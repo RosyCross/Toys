@@ -143,7 +143,7 @@ class Graph
     	//=====================
     	//Get data from adjacent list, beware that there is NO validity checking
     	//=====================
-    	const GraphNode<T>& getNode(IdType from, IdType to) const 
+    	const GraphNode<T>& getNodeId(IdType from, IdType to) const 
 		{ return adjList_[from][to]; };
 		
 		cIdIter  beginNodeIter(IdType from) const
