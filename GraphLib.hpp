@@ -62,7 +62,7 @@ class _IdType : public virtual _final
 		bool operator>=(int rhs) const {return idVal_ >= rhs;};
 		
 		//may not be necessary
-		const _IdType& operator=(int newVal )  { idVal_ = newVal; };
+		const _IdType& operator=(int newVal )  { idVal_ = newVal; return idVal_;};
 		int val() const {return idVal_;}
 		
 	private:
