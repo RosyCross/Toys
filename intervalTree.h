@@ -51,11 +51,11 @@ bool checkInsert(Node* root);
 // different.
 // Interval Tree is mostly used for Integral type of varaiable,
 // e.g. integral coordinates. The lowest node of Interval Tree is
-// composed of [n, n+1]. and the possible nodes is of the form:
+// composed of [n, n+1]. and the possible node is of the form:
 // [n, n+k]. So it is like to have an imaginary full expand of a range
 // up to the minimum difference 1. The concept of Interval Tree is
 // to store the input range(or you can see it as segment) by breaking it
-// into small rangs which the number of ranges is the fewer the better. 
+// into small ranges which the number of ranges is the fewer the better. 
 // The implementation can be:
 // 1. expand the nodes at the begining. the total number is O(2^(range)) 
 // 2. dynmaically allocate necessary nodes according to the input.
@@ -63,7 +63,8 @@ bool checkInsert(Node* root);
 // For other trees with similar names, they store the segments in a 
 // specific way instead of breaking them into pieces. 
 // So we may know from above that Interval Tree here needs a way to associate
-// which segment falls in the node.
+// the segment and the node so that we can know the from which sgement the 
+// piece falling into the node comes from
 //=============================================
 class IntervalTree
 {
