@@ -17,7 +17,7 @@
 //======================================
 //==============================================================
 //==============================================================
-void inorderPrint(Node* node)
+void ItvTreeUtil::inorderPrint(const Node* node)
 {
     if(NULL == node) return;    
     
@@ -30,7 +30,7 @@ void inorderPrint(Node* node)
     inorderPrint(node->rightPtr_);
 }
 //==============================================================
-void collectSeg(Node* node, std::vector<Segment>& segVec )
+void ItvTreeUtil::collectSeg(const Node* node, std::vector<Segment>& segVec )
 {
     if( NULL == node ) return;
     
@@ -53,7 +53,7 @@ void collectSeg(Node* node, std::vector<Segment>& segVec )
     collectSeg(node->rightPtr_,segVec);
 }
 //==============================================================
-bool checkInsert(Node* root)
+bool ItvTreeUtil::checkInsert(const Node* root)
 {
     std::vector<Segment> segVec;
     collectSeg(root,segVec);

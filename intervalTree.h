@@ -40,9 +40,13 @@ typedef struct _node_
 // Strive to make the scope of these functions as
 // small as possible
 //=============================================
-void inorderPrint(Node* node);
-void collectSeg(Node* node, std::vector<Segment>& segVec );
-bool checkInsert(Node* root);
+class ItvTreeUtil 
+{
+    public:
+    static void inorderPrint(const Node* node);
+    static void collectSeg(const Node* node, std::vector<Segment>& segVec );
+    static bool checkInsert(const Node* root);
+};
 
 //=============================================
 // The interval tree is the one brought by bentley. This kind of
@@ -84,8 +88,11 @@ class IntervalTree
         void remove(IntType lower, IntType upper);
         void reverseOverlap(IntType lower,IntType upper, std::vector<Segment>& segVec);
         
-        
-        void print() { inorderPrint(root_); };
+        //
+        //Debug functions. not public functions for interface
+        //
+        void print() { ItvTreeUtil::inorderPrint(root_); };
+ const Node* getRoot() { return root_; }
         
     private:        
         Node::Status updateNodeStatus(Node* node);
@@ -102,7 +109,6 @@ class IntervalTree
             
         IntType lowerLimit_;
         IntType upperLimit_;
-        public:         
         Node*   root_;
 };
 

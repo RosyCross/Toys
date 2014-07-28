@@ -10,20 +10,20 @@
 //=========================================
 struct Point
 {
-	IntType x_;
-	IntType y_;
+    IntType x_;
+    IntType y_;
 };
 
 struct Segment
 {
-	Point head_;
-	Point tail_;
+    Point head_;
+    Point tail_;
 };
 
 struct Rect
 {
-	Point lowerLeft_;
-	Point upperRight_;
+    Point lowerLeft_;
+    Point upperRight_;
 };
 
 #endif
