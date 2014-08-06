@@ -153,7 +153,7 @@ void formContourByVertSeg(const std::vector<Segment>& vertSegVec, std::vector<Se
     if( vertSegVec.size() < 2 ) return;
     
     //triplet content: Point/which vertical seg
-    Point tmpPt = {x_:0,y_:0};
+    Point tmpPt = {.x_=0,.y_=0};
     std::vector<std::pair<Point,size_t> > tripleVec;
     tripleVec.reserve(vertSegVec.size()*2);  
     for (size_t idx = 0; idx < vertSegVec.size(); ++idx)
@@ -311,12 +311,12 @@ int main(int argc, char* argv[])
     itvTree.insert(0,500);
     //itvTree.insert(711,800);
     itvTree.print();
-    checkInsert(itvTree.root_);
+    ItvTreeUtil::checkInsert(itvTree.getRoot());
     printf("Delete\n");
     itvTree.remove(711,800); 
     itvTree.print();
-    checkInsert(itvTree.root_);
-    printf("===>%p \n", itvTree.root_); 
+    ItvTreeUtil::checkInsert(itvTree.getRoot());
+    printf("===>%p \n", itvTree.getRoot()); 
     
 //=====================================================//
     printf("====================Test Reverse Overlap====================\n");
@@ -326,7 +326,7 @@ int main(int argc, char* argv[])
     //itvTree.remove(0,500); 
     itvTree.remove(260,750); 
     itvTree.print();
-    checkInsert(itvTree.root_);
+    ItvTreeUtil::checkInsert(itvTree.getRoot());
     std::vector<Segment> segVec;
     itvTree.reverseOverlap(0,1000,segVec);
     printf("======= reverse overlap ========\n");
