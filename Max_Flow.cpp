@@ -3,6 +3,8 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <assert.h>
+#include <limits.h>
 
 #define DEBUG
 
@@ -27,7 +29,7 @@ bool ReadData()
      GraphNodeId ToNode     = -1;
 //     GraphNodeWeight Weight = -1;
      int nCapacity              = -1;
-     NodeData_C oTmpNode = { m_nCapacity:-1, m_nFlow:-1};
+     NodeData_C oTmpNode = { .m_nCapacity = -1, .m_nFlow = -1};
      while ( 1 <= scanf("%d %d %d",&FromNode, &ToNode, &nCapacity ) )
      {
          printf("From:%d To:%d Flow:%d\n",FromNode, ToNode, nCapacity); 
