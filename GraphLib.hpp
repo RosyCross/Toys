@@ -34,6 +34,7 @@
 #include <vector>
 //#include <tuple>
 
+namespace GraphLib {
 
 class _final 
 {
@@ -278,4 +279,6 @@ IdType Graph<T,S>::addEdge(IdType from, const T& userDataTo, const S& edgeData)
     IdType to = addNode(userDataTo);
 	return addEdge(from,to, edgeData);	      
 }
+
+} //namespace
 #endif
