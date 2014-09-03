@@ -149,17 +149,30 @@ class Graph
 		
 		cIdIter  beginNodeIter(IdType from) const
 		{ return adjList_[from].begin(); }
+
+        idIter   beginNodeIter(IdType from)
+		{ return adjList_[from].begin(); } 
 		
 		cIdIter  endNodeIter(IdType from) const
 		{ return adjList_[from].end(); }
+
+        idIter   endNodeIter(IdType from)
+		{ return adjList_[from].end(); }
+
 		    	
     	IdType getEdgeId(IdType from, IdType to) // map has no const version of "[]", so 
     	{ return neMap_[from][to];}              // cannot be a const member function here.
     	
-    	adjListType::const_iterator  beginAllNodeIter() const
+    	adjListType::const_iterator  beginNodeIter() const
+		{ return adjList_.begin(); }
+
+    	adjListType::iterator  beginNodeIter()
 		{ return adjList_.begin(); }
 		
-		adjListType::const_iterator  endAllNodeIter() const
+		adjListType::const_iterator  endNodeIter() const
+		{ return adjList_.end(); }
+
+        adjListType::iterator  endNodeIter()
 		{ return adjList_.end(); }
 		
 		neMapType::const_iterator beginNeMapIter()  const

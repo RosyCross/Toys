@@ -20,9 +20,11 @@ intervalTree.o : geoObj.h baseTypes.h intervalTree.h intervalTree.cpp
 #=====================
 #    Build executable 
 #=====================
-testGraphLib : GraphLib.hpp testGraphLib.cpp 
-	${CXX} ${STDARGS} ${CXXFLAGS} testGraphLib.cpp -o testGraphLib.exe
+testGraphLib.${EXESUFFIX} : graphLib.hpp testGraphLib.cpp 
+	${CXX} ${STDARGS} ${CXXFLAGS} testGraphLib.cpp -o testGraphLib.${EXESUFFIX}
 
 testIntervalTree.${EXESUFFIX} : intervalTree.o
 	${CXX} ${STDARGS} ${CXXFLAGS} testIntervalTree.cpp intervalTree.o -o testIntervalTree.${EXESUFFIX} 
 	
+testLongestPath.${EXESUFFIX} : graphLib.hpp graphUtil.hpp testLongestPath.cpp
+	${CXX} ${STDARGS} ${CXXFLAGS} ${@:.exe=.cpp} -o $@

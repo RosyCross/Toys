@@ -12,6 +12,9 @@
 #include <queue>
 #include <stack>
 
+#include "graphUtil.hpp"
+#include "inserter.hpp"
+
 // Problems Found:
 // 1. This implementation cannot delete nodes/edges dynamically because
 //    the underlying data structure used is std::vector
@@ -34,6 +37,7 @@
 // overloading member function by using different input parameter class types.
 // PRICE: so many temporary objects and conversions.
 //
+/*
 class _final 
 {
 	private:
@@ -61,13 +65,14 @@ class _IdType : public virtual _final
 		bool operator>=(int rhs) const {return idVal_ >= rhs;};
 		
 		//may not be necessary
-		const _IdType& operator=(int newVal )  { idVal_ = newVal; };
+		const _IdType& operator=(int newVal )  { idVal_ = newVal; return idVal_; };
 		int val() const {return idVal_;}
 		
 	private:
 		int idVal_;
 };
-
+*/
+/*
 //class my : public _IdType {};
 typedef _IdType IdType;
 
@@ -183,25 +188,25 @@ IdType Graph<T>::addEdge(IdType from, const T& userDataTo, int weight)
     IdType to = addNode(userDataTo);
 	return addEdge(from,to, weight);	      
 }
-
+*/
 //
 // An auxiliary inster
 //
 #if 1
-#include "Inserter.hpp"
+#include "inserter.hpp"
 template<>
-void Inserter<std::vector<IdType> >::operator()(const IdType& input) 
+void Inserter<std::vector<GraphLib::IdType> >::operator()(const GraphLib::IdType& input) 
 {
 	container_.push_back(input);
 };
 template<>
-void Inserter<std::set<IdType> >::operator()(const IdType& input) 
+void Inserter<std::set<GraphLib::IdType> >::operator()(const GraphLib::IdType& input) 
 {
 	container_.insert(input);
 };
 #endif
 
-
+/*
 //======================================================================//
 // Operations that can act on Network Flow
 // 
@@ -411,6 +416,7 @@ void getBackEdgeList(G& graph, B& backEdgeListInserter)
 	}
 }
 
+
 template<typename G>
 void dagLogestPath(G& network, IdType source, std::vector<int>& dist, std::set<IdType> skipEdge, std::map<IdType,IdType>& ans)
 {
@@ -516,6 +522,8 @@ void dagLogestPath(G& network, IdType source, std::vector<int>& dist, std::set<I
 #endif	
 }
 
+
+
 template<typename G>
 bool longestPath(G& network, IdType source, std::map<IdType,IdType>& ans)
 {
@@ -580,12 +588,26 @@ for(std::map<IdType,IdType>::iterator iter=ans.begin();
 	printf("Positive Cycle:%d\n",count > backEdgeSet.size() && bRelaxed);
     return (count > backEdgeSet.size() && bRelaxed);
 }
+*/
 
-Graph<int> backEdgeTest1()
+namespace {
+struct MyEdge 
 {
-	Graph<int> graph;
-	IdType from = graph.addNode(0);
-	IdType to ;
+    MyEdge(int weight) { weight_ = weight; };
+    int weight_;
+};
+}
+
+GraphLib::Graph<int,MyEdge> backEdgeTest1()
+{
+    //   1    1    1    1    1    1
+    // 0 -> 1 -> 2 -> 3 -> 4 -> 5
+    //      ^    ^    ^____|
+    //      |    |_________|      
+    //      |--------------|
+	GraphLib::Graph<int,MyEdge> graph;
+	GraphLib::IdType from = graph.addNode(0);
+	GraphLib::IdType to ;
 	for(int idx = 1; idx < 6; ++idx)
 	{
 		to = graph.addNode(idx);
@@ -594,19 +616,26 @@ Graph<int> backEdgeTest1()
 	}    
 	
 	//add cycle here, here the method depends on the implementation of graph
-    graph.addEdge(IdType(4),IdType(3),1);
-    graph.addEdge(IdType(4),IdType(2),1);
-    graph.addEdge(IdType(4),IdType(1),1);
+    graph.addEdge(GraphLib::IdType(4),GraphLib::IdType(3),1);
+    graph.addEdge(GraphLib::IdType(4),GraphLib::IdType(2),1);
+    graph.addEdge(GraphLib::IdType(4),GraphLib::IdType(1),1);
     
     return graph;
 }
 
-Graph<int> backEdgeTest2()
+GraphLib::Graph<int,MyEdge> backEdgeTest2()
 {
+    //   1    1    
+    // 0 -> 1 -> 2 -------------- 
+    //                          |
+    //                          V
+    // 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9 -> 10 -> 11 
+    //      ^------------------------|
+    //
 	//NOT SINGLE SOURCE AND NOT SINGLE SINK
-	Graph<int> graph;
-	IdType from = graph.addNode(0);
-	IdType to ;
+	GraphLib::Graph<int,MyEdge> graph;
+	GraphLib::IdType from = graph.addNode(0);
+	GraphLib::IdType to ;
 	for(int idx = 1; idx < 3; ++idx)
 	{
 		to = graph.addNode(idx);
@@ -630,25 +659,25 @@ Graph<int> backEdgeTest2()
 	}
 	
 	//add cycle here, here the method depends on the implementation of graph
-	graph.addEdge(IdType(2),IdType(8),1);
-	graph.addEdge(IdType(9),IdType(4),1);
+	graph.addEdge(GraphLib::IdType(2),GraphLib::IdType(8),1);
+	graph.addEdge(GraphLib::IdType(9),GraphLib::IdType(4),1);
 	
 	return graph;
 }
 
-Graph<int> cyclicLongestGraphTest()
+GraphLib::Graph<int,MyEdge> cyclicLongestGraphTest()
 {
 	//SINGLE SOURCE AND NOT SINGLE SINK
 	//Use brutal force(depending on the implementation) to setup the graph which means
 	//this is not a usual way to construct a graph in client code
-	Graph<int> graph;	
+	GraphLib::Graph<int,MyEdge> graph;	
 	for(int idx = 0; idx < 6; ++idx)
 	{
 		graph.addNode(idx);
 	}   
 	
-	IdType from(0) ;
-	IdType to(1) ;
+	GraphLib::IdType from(0) ;
+	GraphLib::IdType to(1) ;
 	graph.addEdge(from,to,1); 
 	to = 2;
 	graph.addEdge(from,to,5); 
@@ -681,9 +710,11 @@ int main()
 //	_IdType a = 1;
 //my b;
 	//printf("%ld\n",sizeof(size_t));
-	Graph<int> graph;
-	IdType srcNodeId  = graph.addNode(0);
-	IdType fromNodeId = srcNodeId;
+	GraphLib::Graph<int,MyEdge> graph;
+
+	GraphLib::IdType srcNodeId  = graph.addNode(0);
+	GraphLib::IdType fromNodeId = srcNodeId;
+/*
 	for(int idx = 1; idx < 6; ++idx)
 	{
 		IdType toNodeId = graph.addNode(idx);
@@ -709,33 +740,33 @@ int main()
 	DFS(graph, srcNodeId, check);
 	
 	shortestPath(graph, srcNodeId);
-	
+*/	
 	printf("=================back edge==============\n");
-	std::vector<IdType> backEdgeList;
-	Inserter<std::vector<IdType> > inserter(backEdgeList);
-	Graph<int> testGraph = backEdgeTest1();
-	getBackEdgeList(testGraph, inserter);
+	std::vector<GraphLib::IdType> backEdgeList;
+	Inserter<std::vector<GraphLib::IdType> > inserter(backEdgeList);
+	GraphLib::Graph<int,MyEdge> testGraph = backEdgeTest1();
+	GraphUtil::getBackEdgeList(testGraph, inserter);
 	backEdgeList.clear();
 	testGraph = backEdgeTest2();
-	getBackEdgeList(testGraph, inserter);
+	GraphUtil::getBackEdgeList(testGraph, inserter);
 	printf("========================================\n");
 	
 	printf("=================dag longest path==============\n");
-	std::map<IdType,IdType> ans;
-	std::vector<int> dist(graph.adjList_.size(), INT_MIN);
-	std::set<IdType> skipEdge;
+	std::map<GraphLib::IdType,GraphLib::IdType> ans;
+	std::vector<int> dist(graph.nodeCount(), INT_MIN);
+	std::set<GraphLib::IdType> skipEdge;
 	dist[srcNodeId] = 0;
-	dagLogestPath(graph, srcNodeId, dist, skipEdge, ans);
+	GraphUtil::dagLogestPath(graph, srcNodeId, dist, skipEdge, ans);
 	printf("===============================\n");
 	
 	printf("=================cyclic longest path==============\n");
 	ans.clear();
-	Graph<int> testGraph3 = backEdgeTest1();
-	longestPath(testGraph3, IdType(0), ans);
+	GraphLib::Graph<int,MyEdge> testGraph3 = backEdgeTest1();
+	GraphUtil::longestPath(testGraph3, GraphLib::IdType(0), ans);
 	printf("The sceond test\n");
 	ans.clear();
-	Graph<int> testGraph4 = cyclicLongestGraphTest();
-	longestPath(testGraph4, IdType(0), ans);
+	GraphLib::Graph<int,MyEdge> testGraph4 = cyclicLongestGraphTest();
+	GraphUtil::longestPath(testGraph4, GraphLib::IdType(0), ans);
 	printf("========================================\n");
 	
 	return EXIT_SUCCESS;

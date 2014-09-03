@@ -5,7 +5,8 @@
 #include <stddef.h>
 
 //main Graph structure
-#include "GraphLib.hpp"
+#include "graphLib.hpp"
+#include "graphUtil.hpp"
 
 #include <algorithm>
 #include <map>
@@ -30,6 +31,7 @@ typedef struct _handMade_
     
 } handMade;
 
+/*
 template<typename F>
 int findAugmentPath(F& flowNetwork, GraphLib::IdType source, GraphLib::IdType sink, std::vector<GraphLib::IdType>& augmentPath )
 {
@@ -129,7 +131,8 @@ int findAugmentPath(F& flowNetwork, GraphLib::IdType source, GraphLib::IdType si
     
     return deltaFlow;
 }
-
+*/
+/*
 template <typename F>
 void Edmond_Karp_MaxFlow(F& flowNetwork, GraphLib::IdType source, GraphLib::IdType sink)
 {
@@ -182,6 +185,7 @@ void Edmond_Karp_MaxFlow(F& flowNetwork, GraphLib::IdType source, GraphLib::IdTy
     }
     printf("Total Flow:%d\n", total);
 }
+*/
 
 template<typename F, typename T>
 void genTestCase(F& flowNetwork)
@@ -335,11 +339,11 @@ int main(int argc, char* argv[])
     //GraphLib::GraphEdge<eTuple> edgeTest1(0,1,a)
     GraphLib::Graph<int, eTuple > graph;
     genTestCase< GraphLib::Graph<int,eTuple >, eTuple >(graph);
-    Edmond_Karp_MaxFlow(graph, GraphLib::IdType(0), GraphLib::IdType(5) );
+    GraphUtil::Edmond_Karp_MaxFlow(graph, GraphLib::IdType(0), GraphLib::IdType(5) );
     
     GraphLib::Graph<int, eTuple > graph2;
     genTestCase2< GraphLib::Graph<int,eTuple >, eTuple >(graph2);
-    Edmond_Karp_MaxFlow(graph2, GraphLib::IdType(0), GraphLib::IdType(7) );
+    GraphUtil::Edmond_Karp_MaxFlow(graph2, GraphLib::IdType(0), GraphLib::IdType(7) );
 
     return EXIT_SUCCESS;
 }

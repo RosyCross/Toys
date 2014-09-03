@@ -3,8 +3,8 @@
 
 #include<iterator>
 
-namespace InserterSpace
-{
+//namespace InserterSpace
+//{
 
 template<typename Container>
 class Inserter 
@@ -23,7 +23,7 @@ class Inserter
 		Container& container_;
 };
 
-} //namespace end
+//} //namespace end
 #endif
 
 
