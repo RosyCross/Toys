@@ -13,6 +13,7 @@
 #include <set>
 #include <queue>
 #include <algorithm>
+#include <stack>
 
 namespace GraphUtil {
 //using namespace GraphLib;
