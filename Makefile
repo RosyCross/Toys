@@ -10,6 +10,7 @@ CXXLIBS =
 
 #add suffix for user to rapidly locate the executable
 EXESUFFIX = exe
+CPPSUFFIX = cpp
 
 #=====================
 #    Build Library 
@@ -21,10 +22,21 @@ intervalTree.o : geoObj.h baseTypes.h intervalTree.h intervalTree.cpp
 #    Build executable 
 #=====================
 testGraphLib.${EXESUFFIX} : graphLib.hpp testGraphLib.cpp 
-	${CXX} ${STDARGS} ${CXXFLAGS} testGraphLib.cpp -o testGraphLib.${EXESUFFIX}
+	${CXX} ${STDARGS} ${CXXFLAGS} ${@:.${EXESUFFIX}=.${CPPSUFFIX}} -o $@ 
 
-testIntervalTree.${EXESUFFIX} : intervalTree.o
-	${CXX} ${STDARGS} ${CXXFLAGS} testIntervalTree.cpp intervalTree.o -o testIntervalTree.${EXESUFFIX} 
+testIntervalTree.${EXESUFFIX} : intervalTree.o testIntervalTree.cpp
+	${CXX} ${STDARGS} ${CXXFLAGS} ${@:.${EXESUFFIX}=.${CPPSUFFIX}} intervalTree.o -o $@ 
 	
 testLongestPath.${EXESUFFIX} : graphLib.hpp graphUtil.hpp testLongestPath.cpp
-	${CXX} ${STDARGS} ${CXXFLAGS} ${@:.exe=.cpp} -o $@
+	${CXX} ${STDARGS} ${CXXFLAGS} ${@:.${EXESUFFIX}=.${CPPSUFFIX}} -o $@
+
+#
+# For auto generate depend file
+#
+include testGraphLib.d
+
+%.d : %.cpp
+	echo "start to generate depend file";\
+	${CXX} -M ${CXXFLAGS} $< > $@.$$$$;\
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@;\
+	#rm -f $@.$$$$
