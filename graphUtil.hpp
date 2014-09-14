@@ -14,6 +14,8 @@
 #include <queue>
 #include <algorithm>
 #include <stack>
+#include <iterator>
+
 
 namespace GraphUtil {
 //using namespace GraphLib;
@@ -40,7 +42,7 @@ int findAugmentPath(F& flowNetwork, GraphLib::IdType source, GraphLib::IdType si
         if(curNodeId == sink) break;
         printf("===========================\n");
         //Get Forward direction
-        for( typename F::cIdIter cIter = flowNetwork.beginNodeIter(curNodeId) ;          
+        for( typename F::const_IdIter cIter = flowNetwork.beginNodeIter(curNodeId) ;          
              cIter != flowNetwork.endNodeIter(curNodeId);
              ++cIter
            )
@@ -58,7 +60,7 @@ int findAugmentPath(F& flowNetwork, GraphLib::IdType source, GraphLib::IdType si
         }
         
         //Get nodes in reverse direction
-        for( typename F::neMapType::const_iterator mapIter = flowNetwork.beginNeMapIter();           
+        for( typename F::NeMapType::const_iterator mapIter = flowNetwork.beginNeMapIter();           
              mapIter != flowNetwork.endNeMapIter();
              ++mapIter
            )
@@ -160,7 +162,7 @@ void Edmond_Karp_MaxFlow(F& flowNetwork, GraphLib::IdType source, GraphLib::IdTy
     
     //test
     int total = 0;
-    typename F::cIdIter  cIter = flowNetwork.beginNodeIter(source);
+    typename F::const_IdIter  cIter = flowNetwork.beginNodeIter(source);
     for( ;cIter != flowNetwork.endNodeIter(source); ++cIter )
     {
         flowNetwork.getEdgeId(source, (*cIter));
@@ -176,6 +178,28 @@ struct Rec
     std::vector<GraphLib::IdType>::iterator iter;
 };
 
+//
+// Auxiliary functions for getBackEdgeList inserting capability.
+// Supports usages for std::insert(inserter iterator) and functor
+//
+template<typename Functor,typename DataType>
+void insertHelper(Functor fun, const DataType& data)
+{
+    fun(data);
+}
+
+template<typename Container, typename DataType>
+void insertHelper(std::back_insert_iterator<Container> iter, const DataType& data)
+{
+    *iter = data;
+}
+template<typename Container, typename DataType>
+void insertHelper(std::insert_iterator<Container> iter, const DataType& data)
+{
+    *iter = data;
+}
+
+
 template<typename G, typename B>
 void getBackEdgeList(G& graph, B& backEdgeListInserter)
 {
@@ -184,7 +208,7 @@ void getBackEdgeList(G& graph, B& backEdgeListInserter)
     std::stack<Rec> st;
     std::map<GraphLib::IdType,bool> predecessorHT;
     std::vector<bool> checked(graph.nodeCount(), false);
-    for( typename G::adjListType::iterator iter = graph.beginNodeIter() ;
+    for( typename G::AdjListType::iterator iter = graph.beginNodeIter() ;
          iter != graph.endNodeIter();
          ++iter
        )
@@ -211,7 +235,9 @@ void getBackEdgeList(G& graph, B& backEdgeListInserter)
                        )    
                      {
                         //backEdgeList.push_back( graph.neMap_[curRec.nodeVId][*curRec.iter] );
-                        backEdgeListInserter( graph.getEdgeId(curRec.nodeVId,*curRec.iter) );                 
+                        //backEdgeListInserter( graph.getEdgeId(curRec.nodeVId,*curRec.iter) );                 
+                        insertHelper(backEdgeListInserter, graph.getEdgeId(curRec.nodeVId,*curRec.iter));
+
                      }
                      ++curRec.iter;
                  }
@@ -247,17 +273,18 @@ void getBackEdgeList(G& graph, B& backEdgeListInserter)
     
     
     //print result
-    for(typename B::iterator iter = backEdgeListInserter.getContainer().begin();
+/*    for(typename B::iterator iter = backEdgeListInserter.getContainer().begin();
         iter != backEdgeListInserter.getContainer().end();
         ++iter
        )
     {
         printf("Directed Back Edge: (%d, %d)\n", graph.getEdgeData(*iter).fromId_.val(), graph.getEdgeData(*iter).toId_.val());
     }
+*/
 }
 
 template<typename G>
-void dagLogestPath(G& network, GraphLib::IdType source, std::vector<int>& dist, std::set<GraphLib::IdType> skipEdge, std::map<GraphLib::IdType,GraphLib::IdType>& ans)
+void dagLogestPath(G& network, GraphLib::IdType source, std::vector<int>& dist, std::set<GraphLib::IdType>& skipEdge, std::map<GraphLib::IdType,GraphLib::IdType>& ans)
 {
     //
     // Precondition:
@@ -267,7 +294,7 @@ void dagLogestPath(G& network, GraphLib::IdType source, std::vector<int>& dist, 
     // NOTE: distance for every nodes is saved in one container.
     //       If the implementation take dist as an input parameter,
     //       then it is user's responsibility to initialize it correctly
-    //       and maintain it when it is out out the scope of this function.
+    //       and maintain it when it is out of the scope of this function.
     //
     if( network.nodeCount() <= 0 ) return;
     
@@ -304,7 +331,7 @@ void dagLogestPath(G& network, GraphLib::IdType source, std::vector<int>& dist, 
         queue.pop();
         
         //printf("now checking:%d\n", curNodeId.val());
-        for(typename G::listType::const_iterator cIter = network.beginNodeIter(curNodeId);
+        for(typename G::ListType::const_iterator cIter = network.beginNodeIter(curNodeId);
             cIter != network.endNodeIter(curNodeId);
             ++cIter
            )
@@ -370,8 +397,11 @@ bool longestPath(G& network, GraphLib::IdType source, std::map<GraphLib::IdType,
     //first separate the edges in network to backages and forward edges
     //===========================================================
     std::set<GraphLib::IdType> backEdgeSet;
-    Inserter<std::set<GraphLib::IdType> > inserter(backEdgeSet);
-    getBackEdgeList(network, inserter);
+    //Inserter<std::set<GraphLib::IdType> > inserter(backEdgeSet);
+    std::insert_iterator<std::set<GraphLib::IdType> > 
+    backInserter(backEdgeSet, backEdgeSet.begin());
+    //getBackEdgeList(network, inserter);
+    getBackEdgeList(network, backInserter);
 
     //================================================
     // start to find the longest path

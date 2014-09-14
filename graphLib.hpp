@@ -63,7 +63,7 @@ class _IdType : public virtual _final
         bool operator>=(int rhs) const {return idVal_ >= rhs;};
         
         //may not be necessary
-        const _IdType& operator=(int newVal )  { idVal_ = newVal; return idVal_;};
+        const _IdType& operator=(int newVal )  { idVal_ = newVal; return *this;};
         int val() const {return idVal_;}
         
     private:
@@ -78,12 +78,12 @@ template<typename T>
 class GraphNode
 {
     public:
-    GraphNode(const T& userData): userData_(userData), indegree_(0), Id_(INT_MIN){};
+    GraphNode(const T& userData): userData_(userData), indegree_(0), id_(INT_MIN){};
     
         
     T userData_;
     int indegree_;
-    IdType Id_; 
+    IdType id_; 
 };
 
 template <typename T>
@@ -113,17 +113,63 @@ template<typename T, typename S>
 class Graph
 {
     public: // auxiliary typedefs for convenience
-        typedef std::vector< std::vector<IdType> > adjListType;
-        typedef std::vector< IdType >              listType; 
+        typedef GraphNode<T> NodeType;
+        typedef GraphEdge<S> EdgeType;
+
+        typedef std::vector< std::vector<IdType> > AdjListType;
+        typedef std::vector< IdType >              ListType; 
         
-        typedef std::vector< GraphNode<T> >        nodeDepotType;
-        typedef std::vector<GraphEdge<S> >         edgeDepotType;
+        typedef std::vector< GraphNode<T> >        NodeDepotType;
+        typedef std::vector<GraphEdge<S> >         EdgeDepotType;
         
-        typedef std::vector<IdType>::iterator       idIter; 
-        typedef std::vector<IdType>::const_iterator cIdIter;
+        typedef std::vector<IdType>::iterator       IdIter; 
+        typedef std::vector<IdType>::const_iterator const_IdIter;
         
-        typedef std::map<IdType, std::map<IdType, IdType> > neMapType;
-         
+        typedef std::map<IdType, std::map<IdType, IdType> > NeMapType;
+    public:
+        //========== section for iterators ============//
+        class EdgeIdGen
+        {
+            public:
+                EdgeIdGen(Graph& graph):
+                neMap_(graph.neMap_),
+                iter_(graph.neMap_.begin()) 
+                {
+                    if(!isDone())
+                        iter2_ = (*iter_).second.begin();
+                };
+                bool goNext() const
+                {   ++iter2_;
+                    if( (*iter_).second.end() == iter2_ )
+                    {
+                        ++iter_; iter2_ = (*iter_).second.begin();
+                    }
+                    return !isDone();
+                } ;
+                bool  isDone() const 
+                { 
+                    return (neMap_.end() == iter_); 
+                };
+                //return value because getEdgeData(IdType ) is not a const
+                const IdType& getCurrent() const
+                { return (*iter2_).second;};
+            private:
+                NeMapType& neMap_;
+                mutable NeMapType::iterator iter_;
+                mutable NeMapType::mapped_type::iterator iter2_;
+        };
+        class NodeIdGen
+        {
+            public:
+                NodeIdGen(const Graph& graph):nodeDepot_(graph.nodeDepot_),iter_(graph.nodeDepot_.begin()) {};
+                bool  goNext() const { ++iter_; return !isDone(); } ;
+                bool  isDone() const { return nodeDepot_.end() == iter_; };
+                const IdType& getCurrent() const
+                { return (*iter_).id_;};
+            private:
+                NodeDepotType& nodeDepot_;
+                mutable typename NodeDepotType::iterator iter_;
+        };    
     public:
         IdType addNode(const T& userData);
         //IdType addEdge(IdType from, IdType to,int weight);
@@ -147,40 +193,40 @@ class Graph
         const GraphNode<T>& getNodeId(IdType from, IdType to) const 
         { return adjList_[from][to]; };
         
-        cIdIter  beginNodeIter(IdType from) const
+        const_IdIter  beginNodeIter(IdType from) const
         { return adjList_[from].begin(); }
 
-        idIter   beginNodeIter(IdType from)
+        IdIter   beginNodeIter(IdType from)
         { return adjList_[from].begin(); } 
         
-        cIdIter  endNodeIter(IdType from) const
+        const_IdIter  endNodeIter(IdType from) const
         { return adjList_[from].end(); }
 
-        idIter   endNodeIter(IdType from)
+        IdIter   endNodeIter(IdType from)
         { return adjList_[from].end(); }
 
                 
         IdType getEdgeId(IdType from, IdType to) // map has no const version of "[]", so 
         { return neMap_[from][to];}              // cannot be a const member function here.
         
-        adjListType::const_iterator  beginNodeIter() const
+        AdjListType::const_iterator  beginNodeIter() const
         { return adjList_.begin(); }
 
-        adjListType::iterator  beginNodeIter()
+        AdjListType::iterator  beginNodeIter()
         { return adjList_.begin(); }
         
-        adjListType::const_iterator  endNodeIter() const
+        AdjListType::const_iterator  endNodeIter() const
         { return adjList_.end(); }
 
-        adjListType::iterator  endNodeIter()
+        AdjListType::iterator  endNodeIter()
         { return adjList_.end(); }
         
-        neMapType::const_iterator beginNeMapIter()  const
+        NeMapType::const_iterator beginNeMapIter()  const
         {
             return neMap_.begin();
         }
         
-        neMapType::const_iterator endNeMapIter()  const
+        NeMapType::const_iterator endNeMapIter()  const
         {
             return neMap_.end();
         }
@@ -237,7 +283,7 @@ template<typename T, typename S>
 IdType Graph<T,S>::addNode(const T& userData)
 {
     nodeDepot_.push_back(GraphNode<T>(userData));
-    nodeDepot_.back().Id_ = nodeDepot_.size()-1;
+    nodeDepot_.back().id_ = nodeDepot_.size()-1;
     //remove this line if adjList becomes hash
     adjList_.push_back(std::vector<IdType>());//a place holder      
     return(IdType(nodeDepot_.size()-1));
