@@ -5,10 +5,6 @@
     #include "graphLib.hpp"
 #endif
 
-#ifndef INSERTER_H_H
-    #include "inserter.hpp"
-#endif
-
 #include <vector>
 #include <set>
 #include <queue>
