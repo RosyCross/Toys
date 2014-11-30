@@ -138,6 +138,27 @@ class Graph
                     if(!isDone())
                         iter2_ = (*iter_).second.begin();
                 };
+                IdType getNext()
+                {
+                    IdType edgeId;
+                    if (!isDone())
+                        edgeId = (*iter2_).second;
+  
+                    goNext();
+                    return edgeId;
+                }
+                bool hasNext()
+                {
+                    return !isDone();
+                }
+
+                void init()
+                {
+                    iter_  = neMap_.begin();
+                    if(!isDone())
+                        iter2_ = (*iter_).second.begin();
+                }
+             private:
                 bool goNext() const
                 {   ++iter2_;
                     if( (*iter_).second.end() == iter2_ )
@@ -150,10 +171,7 @@ class Graph
                 { 
                     return (neMap_.end() == iter_); 
                 };
-                //return value because getEdgeData(IdType ) is not a const
-                const IdType& getCurrent() const
-                { return (*iter2_).second;};
-            private:
+
                 NeMapType& neMap_;
                 mutable NeMapType::iterator iter_;
                 mutable NeMapType::mapped_type::iterator iter2_;
@@ -187,6 +205,8 @@ class Graph
         size_t nodeCount() { return nodeDepot_.size(); }
         size_t edgeCount() { return edgeDepot_.size(); }
         
+        //size_t getOutEdgeCount(IdType from) { return adjList_[from].size(); }
+
         //=====================
         //Get data from adjacent list, beware that there is NO validity checking
         //=====================
@@ -313,7 +333,7 @@ IdType Graph<T,S>::addEdge(IdType from, IdType to, const S& edgeData)
     adjList_[from].push_back(to);
     neMap_[from][to] = edgeDepot_.size()-1;
     //adjList[from].push_back(edgeDepot_.size()-1);
-    printf("F-T:(%d,%d) size:%d\n",(int)from , (int)to, adjList_[from].size());
+    //printf("F-T:(%d,%d) size:%d\n",(int)from , (int)to, adjList_[from].size());
     return(IdType(edgeDepot_.size()-1));
 }
 
