@@ -30,13 +30,13 @@ testIntervalTree.${EXESUFFIX} : intervalTree.o testIntervalTree.cpp
 testLongestPath.${EXESUFFIX} : graphLib.hpp graphUtil.hpp testLongestPath.cpp
 	${CXX} ${STDARGS} ${CXXFLAGS} ${@:.${EXESUFFIX}=.${CPPSUFFIX}} -o $@
 
-#
+#================================
 # For auto generate depend file
-#
-include testGraphLib.d
+#================================
+###include testGraphLib.d
 
-%.d : %.cpp
-	echo "start to generate depend file";\
-	${CXX} -M ${CXXFLAGS} $< > $@.$$$$;\
-	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@;\
-	#rm -f $@.$$$$
+###%.d : %.cpp
+###	echo "start to generate depend file";\
+###	${CXX} -M ${CXXFLAGS} $< > $@.$$$$;\
+###	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@;\
+###	#rm -f $@.$$$$
