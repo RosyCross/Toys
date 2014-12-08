@@ -12,7 +12,7 @@
 #include <functional> // function object for member function
 
 #include "intervalTree.h"
-#include "geoObj.h"
+#include "geomObj.h"
 
 //==============================================================
 //==============================================================

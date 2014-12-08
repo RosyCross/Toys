@@ -10,7 +10,7 @@
 #include <algorithm>
 
 #include "baseTypes.h"
-#include "geoObj.h"
+#include "geomObj.h"
 
 //======================================
 // Basic debug and verifying functions

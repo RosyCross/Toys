@@ -8,10 +8,10 @@
 #ifndef _GCC_LIMITS_H_
 #include <limits.h>
 #endif
-#ifndef _GEOOBJ_H_
-#include "geoObj.h"
+#ifndef GEOMOBJ_H_
+#include "geomObj.h"
 #endif
-#ifndef _BASETYPES_H_
+#ifndef BASETYPES_H_
 #include "baseTypes.h"
 #endif
 

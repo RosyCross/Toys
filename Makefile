@@ -15,7 +15,7 @@ CPPSUFFIX = cpp
 #=====================
 #    Build Library 
 #=====================
-intervalTree.o : geoObj.h baseTypes.h intervalTree.h intervalTree.cpp
+intervalTree.o : geomObj.h baseTypes.h intervalTree.h intervalTree.cpp
 	${CXX} ${STDARGS} ${CXXFLAGS} -c intervalTree.cpp -o intervalTree.o
 
 #=====================
