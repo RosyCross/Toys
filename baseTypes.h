@@ -9,4 +9,8 @@ typedef int IntType;
 const IntType IntTypeMax = INT_MAX;
 const IntType IntTypeMin = INT_MIN;
 
+typedef int Coord;
+const Coord COORD_MAX = INT_MAX;
+const Coord COORD_MIN = INT_MIN;
+
 #endif

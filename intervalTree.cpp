@@ -39,14 +39,15 @@ void ItvTreeUtil::collectSeg(const Node* node, std::vector<Segment>& segVec )
     if( 0 < node->count_ )
     {
         //assume it is 1d
-        if ( 0 >= segVec.size() || segVec.back().tail_.x_ != node->coord1_ )
+        if ( 0 >= segVec.size() || segVec.back().getTail().getX() != node->coord1_ )
         {       
             Segment tmpSeg = { {node->coord1_, 0}, {node->coord2_,0} };
             segVec.push_back(tmpSeg);
         }
         else
         {
-            segVec.back().tail_.x_ = node->coord2_;
+            //segVec.back().getTail().getX() = node->coord2_;
+            segVec.back().setTailX(node->coord2_);
         }
     }
         
@@ -63,21 +64,21 @@ bool ItvTreeUtil::checkInsert(const Node* root)
     else if( 1< segVec.size() )
     {
         bool rtv = true;
-        IntType left  = segVec.front().head_.x_;
-        IntType right = segVec.front().tail_.x_;
+        IntType left  = segVec.front().getHead().getX();
+        IntType right = segVec.front().getTail().getX();
         for(int idx = 1; idx < segVec.size();++idx)
         {
-            if( segVec[idx-1].tail_.x_ != segVec[idx].head_.x_ )
+            if( segVec[idx-1].getTail().getX() != segVec[idx].getHead().getX() )
             {
                 rtv = false;
                 printf("DISJOINED interval: (%d %d)---(%d %d)\n",
-                        segVec[idx-1].head_.x_, segVec[idx-1].tail_.x_,
-                        segVec[idx].head_.x_, segVec[idx].tail_.x_
+                        segVec[idx-1].getHead().getX(), segVec[idx-1].getTail().getX(),
+                        segVec[idx].getHead().getX(), segVec[idx].getTail().getX()
                       );
             }
             else
             {
-                right = segVec[idx].tail_.x_;
+                right = segVec[idx].getTail().getX();
             }
         }
         if(rtv)
@@ -247,14 +248,15 @@ Node::Status IntervalTree::iDelete(IntType lower, IntType upper, Node* node)
 void IntervalTree::collectSegment(Point head, Point tail,std::vector<Segment>& segVec)
 {
     if( 0 >= segVec.size() || 
-        (segVec.back().tail_.y_ != head.y_ ) )
+        (segVec.back().getTail().getY() != head.getY() ) )
     {
         Segment tmpSeg = { head, tail };
         segVec.push_back( tmpSeg );
     }
     else // can merge the previous segment with the current segment
     {
-        segVec.back().tail_.y_ = tail.y_;
+        //segVec.back().getTail().getY() = tail.getY();
+        segVec.back().setTailY(tail.getY());
     }
 }
 void IntervalTree::iReverseOverlap(IntType lower,IntType upper, Node* node, std::vector<Segment>& segVec)

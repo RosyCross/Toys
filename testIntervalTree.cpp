@@ -40,8 +40,8 @@ void getVerticalSeg(const std::vector<Rect>& rectVec, std::vector<Segment>& vert
     std::vector< std::pair<IntType, IntType> > rectVertSegVec;
     for(size_t idx = 0; idx < rectVec.size(); ++idx)
     {
-        rectVertSegVec.push_back(std::pair<IntType,size_t>(rectVec[idx].lowerLeft_.x_, idx) );
-        rectVertSegVec.push_back(std::pair<IntType,size_t>(rectVec[idx].upperRight_.x_, idx) );
+        rectVertSegVec.push_back(std::pair<IntType,size_t>(rectVec[idx].getLL().getX(), idx) );
+        rectVertSegVec.push_back(std::pair<IntType,size_t>(rectVec[idx].getUR().getX(), idx) );
     }   
     assert( 0 == (rectVertSegVec.size() & 1) );
 
@@ -52,10 +52,10 @@ void getVerticalSeg(const std::vector<Rect>& rectVec, std::vector<Segment>& vert
     for(size_t idx = 0; idx< rectVertSegVec.size(); ++idx)
     {
         printf("x:%d --- (%d, %d)=(%d,%d)\n", rectVertSegVec[idx].first,
-                rectVec[rectVertSegVec[idx].second].lowerLeft_.x_,
-                rectVec[rectVertSegVec[idx].second].lowerLeft_.y_,
-                rectVec[rectVertSegVec[idx].second].upperRight_.x_,
-                rectVec[rectVertSegVec[idx].second].upperRight_.y_
+                rectVec[rectVertSegVec[idx].second].getLL().getX(),
+                rectVec[rectVertSegVec[idx].second].getLL().getY(),
+                rectVec[rectVertSegVec[idx].second].getUR().getX(),
+                rectVec[rectVertSegVec[idx].second].getUR().getY()
               );
     }
     
@@ -65,52 +65,66 @@ void getVerticalSeg(const std::vector<Rect>& rectVec, std::vector<Segment>& vert
     //IntervalTree itvTree(rectVertSegVec.front().first, rectVertSegVec.back().first);
     IntervalTree itvTree(1, 60);
     std::vector<Segment> tmpSegVec; // for temporary result from interval tree
-    Segment tmpSeg;
+    Segment tmpSeg(Point(0,0),Point(0,0));
     for(size_t idx = 0; idx < rectVertSegVec.size(); ++idx)
     {       
         tmpSegVec.clear();
         // encounter left vertical edge of one rectangle
-        if( rectVertSegVec[idx].first == rectVec[rectVertSegVec[idx].second].lowerLeft_.x_ )
+        if( rectVertSegVec[idx].first == rectVec[rectVertSegVec[idx].second].getLL().getX() )
         {   
-            itvTree.reverseOverlap(rectVec[rectVertSegVec[idx].second].lowerLeft_.y_, 
-                                   rectVec[rectVertSegVec[idx].second].upperRight_.y_,
+            itvTree.reverseOverlap(rectVec[rectVertSegVec[idx].second].getLL().getY(), 
+                                   rectVec[rectVertSegVec[idx].second].getUR().getY(),
                                    tmpSegVec          
                                   );
                                     
-            itvTree.insert(rectVec[rectVertSegVec[idx].second].lowerLeft_.y_, 
-                           rectVec[rectVertSegVec[idx].second].upperRight_.y_);
+            itvTree.insert(rectVec[rectVertSegVec[idx].second].getLL().getY(), 
+                           rectVec[rectVertSegVec[idx].second].getUR().getY());
                                     
             for(size_t idy = 0; idy < tmpSegVec.size(); ++idy)
             {   
             
                 //set correct direction: downward                           
-                tmpSeg.head_.y_ = std::max(tmpSegVec[idy].head_.y_,tmpSegVec[idy].tail_.y_);
-                tmpSeg.tail_.y_ = std::min(tmpSegVec[idy].head_.y_,tmpSegVec[idy].tail_.y_);
+                //tmpSeg.getHead().getY() = std::max(tmpSegVec[idy].getHead().getY(),tmpSegVec[idy].getTail().getY());
+                tmpSeg.setHeadY( std::max(tmpSegVec[idy].getHead().getY(),tmpSegVec[idy].getTail().getY()) );
+                //tmpSeg.getTail().getY() = std::min(tmpSegVec[idy].getHead().getY(),tmpSegVec[idy].getTail().getY());
+                tmpSeg.setTailY( std::min(tmpSegVec[idy].getHead().getY(),tmpSegVec[idy].getTail().getY()) );
+
                 //set correct x coordinate
-                tmpSeg.head_.x_ = rectVec[rectVertSegVec[idx].second].lowerLeft_.x_;
-                tmpSeg.tail_.x_ = rectVec[rectVertSegVec[idx].second].lowerLeft_.x_;
+                //tmpSeg.getHead().getX() = rectVec[rectVertSegVec[idx].second].getLL().getX();
+                tmpSeg.setHeadX( rectVec[rectVertSegVec[idx].second].getLL().getX() );
+
+                //tmpSeg.getTail().getX() = rectVec[rectVertSegVec[idx].second].getLL().getX();
+                tmpSeg.setTailX( rectVec[rectVertSegVec[idx].second].getLL().getX() );
+
                 vertSegVec.push_back(tmpSeg);
             }
         }
         else // encounter right vertical edge of one rectangle
         {   
-            itvTree.remove(rectVec[rectVertSegVec[idx].second].lowerLeft_.y_, 
-                           rectVec[rectVertSegVec[idx].second].upperRight_.y_
+            itvTree.remove(rectVec[rectVertSegVec[idx].second].getLL().getY(), 
+                           rectVec[rectVertSegVec[idx].second].getUR().getY()
                            );
             
-            itvTree.reverseOverlap(rectVec[rectVertSegVec[idx].second].lowerLeft_.y_, 
-                                   rectVec[rectVertSegVec[idx].second].upperRight_.y_,
+            itvTree.reverseOverlap(rectVec[rectVertSegVec[idx].second].getLL().getY(), 
+                                   rectVec[rectVertSegVec[idx].second].getUR().getY(),
                                    tmpSegVec          
                                   );
                 
             for(size_t idy = 0; idy < tmpSegVec.size(); ++idy)
             {   
                 //set correct direction: upward         
-                tmpSeg.head_.y_ = std::min(tmpSegVec[idy].head_.y_,tmpSegVec[idy].tail_.y_);
-                tmpSeg.tail_.y_ = std::max(tmpSegVec[idy].head_.y_,tmpSegVec[idy].tail_.y_);
+                //tmpSeg.getHead().getY() = std::min(tmpSegVec[idy].getHead().getY(),tmpSegVec[idy].getTail().getY());
+                tmpSeg.setHeadY( std::min(tmpSegVec[idy].getHead().getY(),tmpSegVec[idy].getTail().getY()) );
+                //tmpSeg.getTail().getY() = std::max(tmpSegVec[idy].getHead().getY(),tmpSegVec[idy].getTail().getY());
+                tmpSeg.setTailY( std::max(tmpSegVec[idy].getHead().getY(),tmpSegVec[idy].getTail().getY()) );
+
                 //set correct x coordinate
-                tmpSeg.head_.x_ = rectVec[rectVertSegVec[idx].second].upperRight_.x_;
-                tmpSeg.tail_.x_ = rectVec[rectVertSegVec[idx].second].upperRight_.x_;
+                //tmpSeg.getHead().getX() = rectVec[rectVertSegVec[idx].second].getUR().getX();
+                tmpSeg.setHeadX( rectVec[rectVertSegVec[idx].second].getUR().getX() );
+
+                //tmpSeg.getTail().getX() = rectVec[rectVertSegVec[idx].second].getUR().getX();
+                tmpSeg.setTailX( rectVec[rectVertSegVec[idx].second].getUR().getX() );
+
                 vertSegVec.push_back(tmpSeg);
             }
         }                              
@@ -118,20 +132,20 @@ void getVerticalSeg(const std::vector<Rect>& rectVec, std::vector<Segment>& vert
     }
     for(size_t idx = 0; idx < vertSegVec.size(); ++idx)
     {
-        printf("(%d,%d) (%d,%d)\n",vertSegVec[idx].head_.x_, vertSegVec[idx].head_.y_,
-                                   vertSegVec[idx].tail_.x_, vertSegVec[idx].tail_.y_ );
+        printf("(%d,%d) (%d,%d)\n",vertSegVec[idx].getHead().getX(), vertSegVec[idx].getHead().getY(),
+                                   vertSegVec[idx].getTail().getX(), vertSegVec[idx].getTail().getY() );
     }
 }
 bool sortByYX(const std::pair<Point,size_t>& a, const std::pair<Point,size_t>& b)
 {
-    bool rtv = (a.first.y_ != b.first.y_) ? (a.first.y_ < b.first.y_) : (a.first.x_ < b.first.x_) ;
+    bool rtv = (a.first.getY() != b.first.getY()) ? (a.first.getY() < b.first.getY()) : (a.first.getX() < b.first.getX()) ;
     return rtv;
     
 }
 class SegmentLink
 {
     public:
-        //SegmentLink() :head_(0),tail_(0) { seg_.head_ };
+        //SegmentLink() .getHead()(0).getTail()(0) { seg_.getHead() };
         SegmentLink(const Segment& seg, size_t headId, size_t tailId):
             seg_(seg),headId_(headId),tailId_(tailId) {};
             
@@ -153,14 +167,14 @@ void formContourByVertSeg(const std::vector<Segment>& vertSegVec, std::vector<Se
     if( vertSegVec.size() < 2 ) return;
     
     //triplet content: Point/which vertical seg
-    Point tmpPt = {.x_=0,.y_=0};
+    Point tmpPt(0,0);
     std::vector<std::pair<Point,size_t> > tripleVec;
     tripleVec.reserve(vertSegVec.size()*2);  
     for (size_t idx = 0; idx < vertSegVec.size(); ++idx)
     {
-        tmpPt = vertSegVec[idx].head_;
+        tmpPt = vertSegVec[idx].getHead();
         tripleVec.push_back( std::pair<Point,size_t>(tmpPt,idx) ) ;
-        tmpPt = vertSegVec[idx].tail_;
+        tmpPt = vertSegVec[idx].getTail();
         tripleVec.push_back( std::pair<Point,size_t>(tmpPt,idx) ) ;
     }
     
@@ -196,19 +210,21 @@ void formContourByVertSeg(const std::vector<Segment>& vertSegVec, std::vector<Se
     }
     
     //put in the horizontal segments
-    Segment tmpSeg;
+    Segment tmpSeg(Point(0,0),Point(0,0));
     for(size_t idx = 1; idx <= tripleVec.size()-1; idx+=2 )
     {
-/*      assert((tripleVec[idx].first.y_ == vertSegVec[tripleVec[idx].second].head_.y_ && 
-                tripleVec[idx].first.y_ == vertSegVec[tripleVec[idx-1].second].tail_.y_ ) ||
-               (tripleVec[idx].first.y_ == vertSegVec[tripleVec[idx].second].tail_.y_ && 
-                tripleVec[idx].first.y_ == vertSegVec[tripleVec[idx-1].second].head_.y_)
+/*      assert((tripleVec[idx].first.getY() == vertSegVec[tripleVec[idx].second].getHead().getY() && 
+                tripleVec[idx].first.getY() == vertSegVec[tripleVec[idx-1].second].getTail().getY() ) ||
+               (tripleVec[idx].first.getY() == vertSegVec[tripleVec[idx].second].getTail().getY() && 
+                tripleVec[idx].first.getY() == vertSegVec[tripleVec[idx-1].second].getHead().getY())
               );*/
-        if(tripleVec[idx].first.y_ == vertSegVec[tripleVec[idx].second].tail_.y_)
+        if(tripleVec[idx].first.getY() == vertSegVec[tripleVec[idx].second].getTail().getY())
         {
             //right to left
-            tmpSeg.head_ = tripleVec[idx].first; 
-            tmpSeg.tail_ = tripleVec[idx-1].first; 
+            //tmpSeg.getHead() = tripleVec[idx].first; 
+            tmpSeg.setHead( tripleVec[idx].first ); 
+            //tmpSeg.getTail() = tripleVec[idx-1].first; 
+            tmpSeg.setTail( tripleVec[idx-1].first );
             segLinkVec.push_back(SegmentLink(tmpSeg, tripleVec[idx].second, tripleVec[idx-1].second));
             segLinkVec[tripleVec[idx-1].second].headId_ = segLinkVec.size()-1;
             segLinkVec[tripleVec[idx].second].tailId_   = segLinkVec.size()-1;
@@ -216,8 +232,10 @@ void formContourByVertSeg(const std::vector<Segment>& vertSegVec, std::vector<Se
         else
         {
             //left to right
-            tmpSeg.head_ = tripleVec[idx-1].first;
-            tmpSeg.tail_ = tripleVec[idx].first; 
+            //tmpSeg.getHead() = tripleVec[idx-1].first;
+            tmpSeg.setHead( tripleVec[idx-1].first );
+            //tmpSeg.getTail() = tripleVec[idx].first; 
+            tmpSeg.setTail( tripleVec[idx].first ); 
             segLinkVec.push_back(SegmentLink(tmpSeg, tripleVec[idx-1].second, tripleVec[idx].second));
             segLinkVec[tripleVec[idx].second].headId_ = segLinkVec.size()-1;
             segLinkVec[tripleVec[idx-1].second].tailId_ = segLinkVec.size()-1;
@@ -227,8 +245,8 @@ void formContourByVertSeg(const std::vector<Segment>& vertSegVec, std::vector<Se
     for(size_t idx = 0; idx < segLinkVec.size(); ++idx )
     {
         printf("segmentLink:[%u] (%d,%d)-(%d,%d) head:%u tail:%u\n", idx,
-                segLinkVec[idx].seg_.head_.x_,segLinkVec[idx].seg_.head_.y_,
-                segLinkVec[idx].seg_.tail_.x_,segLinkVec[idx].seg_.tail_.y_,
+                segLinkVec[idx].seg_.getHead().getX(),segLinkVec[idx].seg_.getHead().getY(),
+                segLinkVec[idx].seg_.getTail().getX(),segLinkVec[idx].seg_.getTail().getY(),
                 segLinkVec[idx].headId_, segLinkVec[idx].tailId_
               );
     }       
@@ -252,8 +270,8 @@ void formContourByVertSeg(const std::vector<Segment>& vertSegVec, std::vector<Se
 
     for (size_t idx = 0; idx < contourSegVec.size(); ++idx )
     {
-        printf("CONTOUR: (%d,%d)-(%d,%d)\n", contourSegVec[idx].head_.x_,contourSegVec[idx].head_.y_,
-                                             contourSegVec[idx].tail_.x_,contourSegVec[idx].tail_.y_
+        printf("CONTOUR: (%d,%d)-(%d,%d)\n", contourSegVec[idx].getHead().getX(),contourSegVec[idx].getHead().getY(),
+                                             contourSegVec[idx].getTail().getX(),contourSegVec[idx].getTail().getY()
               );
     }
 }
@@ -295,7 +313,7 @@ int main(int argc, char* argv[])
     printf("======= reverse overlap ========\n");
     for(int idx = 0; idx < segVec2.size(); ++idx)
     {
-        printf("(%d,%d) \n",segVec2[idx].head_.y_,segVec2[idx].tail_.y_);
+        printf("(%d,%d) \n",segVec2[idx].getHead().getY(),segVec2[idx].getTail().getY());
     }   
     itvTree2.remove(51,60);
     itvTree2.print(),printf("=============================\n");;
@@ -332,7 +350,7 @@ int main(int argc, char* argv[])
     printf("======= reverse overlap ========\n");
     for(int idx = 0; idx < segVec.size(); ++idx)
     {
-        printf("(%d,%d) \n",segVec[idx].head_.y_,segVec[idx].tail_.y_);
+        printf("(%d,%d) \n",segVec[idx].getHead().getY(),segVec[idx].getTail().getY());
     }   
     printf("====================End of Test Reverse Overlap====================\n");
     //         --------
@@ -359,35 +377,44 @@ int main(int argc, char* argv[])
     Rect tmpRect = { {1,1}, {10,10} }; 
     rectVec.push_back(tmpRect);
     
-    tmpRect.lowerLeft_.x_ += 30; tmpRect.upperRight_.x_ += 30;
+    //tmpRect.lowerLeft_.getX() += 30; tmpRect.upperRight_.getX() += 30;
+    tmpRect.setLLX(tmpRect.getLLX()+30); tmpRect.setURX(tmpRect.getURX()+30);
     rectVec.push_back(tmpRect);
     
-    tmpRect.lowerLeft_.y_ += 50; tmpRect.upperRight_.y_ += 50;
+    //tmpRect.lowerLeft_.getY() += 50; tmpRect.upperRight_.getY() += 50;
+    tmpRect.setLLY(tmpRect.getLLY()+50); tmpRect.setURY(tmpRect.getURY()+50);
     rectVec.push_back(tmpRect);
     
-    tmpRect.lowerLeft_.x_ -= 30; tmpRect.upperRight_.x_ -= 30;
+    //tmpRect.lowerLeft_.getX() -= 30; tmpRect.upperRight_.getX() -= 30;
+    tmpRect.setLLX(tmpRect.getLLX()-30); tmpRect.setURX(tmpRect.getURX()-30);
     rectVec.push_back(tmpRect);
     
     //horizontal strip
-    tmpRect.lowerLeft_.x_  = 3;  tmpRect.lowerLeft_.y_  = 3;
-    tmpRect.upperRight_.x_ = 35; tmpRect.upperRight_.y_ = 5;
+    //tmpRect.lowerLeft_.getX()  = 3;  tmpRect.lowerLeft_.getY()  = 3;
+    tmpRect.setLLX(3); tmpRect.setLLY(3);
+    //tmpRect.upperRight_.getX() = 35; tmpRect.upperRight_.getY() = 5;
+    tmpRect.setURX(35); tmpRect.setURY(5); 
     rectVec.push_back(tmpRect);
-    tmpRect.lowerLeft_.y_  += 50; tmpRect.upperRight_.y_ += 50;
+    //tmpRect.lowerLeft_.getY()  += 50; tmpRect.upperRight_.getY() += 50;
+    tmpRect.setLLY(tmpRect.getLLY()+50); tmpRect.setURY(tmpRect.getURY()+50);
     rectVec.push_back(tmpRect);
     
     //vertical strip
-    tmpRect.lowerLeft_.x_  = 2;  tmpRect.lowerLeft_.y_  = 2;
-    tmpRect.upperRight_.x_ = 4;  tmpRect.upperRight_.y_ = 56;
+    //tmpRect.lowerLeft_.getX()  = 2;  tmpRect.lowerLeft_.getY()  = 2;
+    tmpRect.setLLX(2); tmpRect.setLLY(2);
+    //tmpRect.upperRight_.getX() = 4;  tmpRect.upperRight_.getY() = 56;
+    tmpRect.setURX(4); tmpRect.setURY(56);
     rectVec.push_back(tmpRect);
-    tmpRect.lowerLeft_.x_  += 30; tmpRect.upperRight_.x_ += 30;
+    //tmpRect.lowerLeft_.getX()  += 30; tmpRect.upperRight_.getX() += 30;
+    tmpRect.setLLX(tmpRect.getLLX()+30); tmpRect.setURX(tmpRect.getURX()+30);
     rectVec.push_back(tmpRect);
     
     getVerticalSeg(rectVec, verticalSegVec);    
     formContourByVertSeg(verticalSegVec, contourSegVec);
     printf("==============END of Testing harder shapes===============\n");
  
-    std::_Identity<int> a;
-    std::_Rb_tree<int,int,std::_Identity<int>, std::less<int> > aa;
+//    std::_Identity<int> a;
+//    std::_Rb_tree<int,int,std::_Identity<int>, std::less<int> > aa;
  
 
     return EXIT_SUCCESS;
