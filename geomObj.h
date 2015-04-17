@@ -8,6 +8,7 @@
 //=========================================
 // Integral Geometry Primitive Objects
 //=========================================
+/*
 class Point
 {
     public:
@@ -22,6 +23,23 @@ class Point
         Coord    x_;
         Coord    y_;
 };
+*/
+template<typename T>
+class _Point_
+{
+    public:
+        _Point_(T x, T y):x_(x),y_(y){}
+      const T&   getX() const { return x_; }
+      const T&   getY() const { return y_; }
+         void    setX(T x) { x_ = x; }
+         void    setY(T y) { y_ = y; }
+
+
+    private:
+            T    x_;
+            T    y_;
+};
+typedef _Point_<Coord> Point;
 
 class Segment
 {
