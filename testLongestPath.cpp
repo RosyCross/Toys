@@ -15,180 +15,6 @@
 #include "graphUtil.hpp"
 #include "inserter.hpp"
 
-// Problems Found:
-// 1. This implementation cannot delete nodes/edges dynamically because
-//    the underlying data structure used is std::vector
-//
-// 2. THIS LIBRARY DOES NOT CHECK PRECONDITIONS of WORKING FUNCTIONS. USER SHOULD
-//    MAKE SURE THE PRECONDITONS ARE SATISFIED BEFORE CALLING WORKING FUNCTIONS.
-//    BEWARE: THE WORKING FUNCTIONS IN THIS FILE IS FOR FLOW NETWORK WHICH MEANS
-//    THERE IS ONE SOURCE and ONE SINK
-//
-// 3. Should add more getter to encapsulate internal data structures of Graph and others
-//
-// 4. Because operator[] of std::map does not have const version, it prohibits to add
-//    const qualifier for class template Graph
-//
-
-//
-// class _IdType is an experimental class try to solve the 
-// overloading problem of the member function of template class.
-// This class is kind of use the mechanism of choosing
-// overloading member function by using different input parameter class types.
-// PRICE: so many temporary objects and conversions.
-//
-/*
-class _final 
-{
-    private:
-        friend class _IdType;
-        _final()  {};
-        virtual ~_final() {};
-        
-};
-class _IdType : public virtual _final
-{
-    public:
-        explicit _IdType(): idVal_(0){}
-        _IdType(int value): idVal_(value){}
-        operator int()    const { return idVal_;};
-        operator size_t() const { return (size_t)idVal_;};
-        bool operator<(const _IdType& rhs)  const {return idVal_  < rhs.idVal_;};
-        bool operator>(const _IdType& rhs)  const {return idVal_  > rhs.idVal_;};
-        bool operator==(const _IdType& rhs) const {return idVal_ == rhs.idVal_;};
-        bool operator>=(const _IdType& rhs) const {return idVal_ >= rhs.idVal_;};
-        bool operator<=(const _IdType& rhs) const {return idVal_ <= rhs.idVal_;};
-        
-        bool operator<(int rhs) const {return idVal_  < rhs;};
-        bool operator>(int rhs) const {return idVal_  > rhs;};
-        bool operator==(int rhs) const {return idVal_ == rhs;};     
-        bool operator>=(int rhs) const {return idVal_ >= rhs;};
-        
-        //may not be necessary
-        const _IdType& operator=(int newVal )  { idVal_ = newVal; return idVal_; };
-        int val() const {return idVal_;}
-        
-    private:
-        int idVal_;
-};
-*/
-/*
-//class my : public _IdType {};
-typedef _IdType IdType;
-
-//typedef int IdType;
-template<typename T>
-class GraphNode
-{
-    public:
-    GraphNode(const T& userData): userData_(userData), indegree_(0), Id_(INT_MIN){};
-    
-        
-    T userData_;
-    int indegree_;
-    IdType Id_; 
-};
-
-class GraphEdge
-{
-    public:
-    GraphEdge(IdType from,IdType to):fromId_(from),toId_(to), weight_(0) {};
-        
-    IdType fromId_;
-    IdType toId_;
-    int weight_;
-};
-
-template<typename T>
-class Graph
-{
-    public: // auxiliary typedefs for convenience
-        typedef std::vector< std::vector<IdType> > adjListType;
-        typedef std::vector< IdType >              listType; 
-        
-        typedef std::vector< GraphNode<T> >        nodeDepotType;
-        typedef std::vector<GraphEdge>             edgeDepotType;
-        
-        typedef std::vector<IdType>::iterator       idIter; 
-        typedef std::vector<IdType>::const_iterator cIdIter;
-         
-    public:
-        IdType addNode(const T& userData);
-        IdType addEdge(IdType from, IdType to,int weight);
-        IdType addEdge(const T& userDataFrom, const T& userDataTo, int weight);
-        IdType addEdge(IdType from, const T& userDataTo, int weight);
-        //use Hash will be good. But STL::MAP is not a real HASH
-        std::vector< std::vector<IdType> > adjList_;
-        std::map<IdType, std::map<IdType, IdType> > neMap_; //cannot think of a concise model for this
-        //depots
-        std::vector< GraphNode<T> > nodeDepot_;
-        std::vector<GraphEdge> edgeDepot_;  
-    
-    private:
-        IdType valueToId(size_t value) {return (IdType)value;}          
-};
-
-
-template<typename T>
-IdType Graph<T>::addNode(const T& userData)
-{
-    nodeDepot_.push_back(GraphNode<T>(userData));
-    nodeDepot_.back().Id_ = nodeDepot_.size()-1;
-    //remove this line if adjList becomes hash
-    adjList_.push_back(std::vector<IdType>());//a place holder      
-    return(IdType(nodeDepot_.size()-1));
-}
-
-template<typename T>
-IdType Graph<T>::addEdge(IdType from, IdType to, int weight)
-{   
-    assert( from < (int)nodeDepot_.size() && 
-            from >= 0 
-          );
-    assert( to < (int)nodeDepot_.size() && 
-            to >= 0 
-          );      
-    if( !(from < (int)nodeDepot_.size() && from >= 0 ) )      
-        return INT_MIN;
-        
-    if( !(to < (int)nodeDepot_.size() && to >= 0 ) )    
-        return INT_MIN;
-        
-    edgeDepot_.push_back(GraphEdge(from,to));
-    edgeDepot_.back().fromId_ = from;
-    edgeDepot_.back().toId_   = to;
-    edgeDepot_.back().weight_ = weight;
-    ++nodeDepot_[to].indegree_;
-    //adjList[from][to] = edgeDepot_.size()-1;
-    adjList_[from].push_back(to);
-    neMap_[from][to] = edgeDepot_.size()-1;
-    //adjList[from].push_back(edgeDepot_.size()-1);
-    printf("F-T:(%d,%d) size:%d\n",(int)from , (int)to, adjList_[from].size());
-    return(IdType(edgeDepot_.size()-1));
-}
-
-template<typename T>
-IdType Graph<T>::addEdge(const T& userDataFrom, const T& userDataTo, int weight)
-{
-    IdType fromId = addNode(userDataFrom);
-    IdType toId   = addNode(userDataTo);
-    return addEdge(fromId, toId, weight);
-}
-
-template<typename T>
-IdType Graph<T>::addEdge(IdType from, const T& userDataTo, int weight)
-{
-    assert( from < (int)nodeDepot_.size() && 
-            from >= 0 
-          );
-
-    if( !(from < (int)nodeDepot_.size() && from >= 0 ) )      
-        return INT_MIN;
-
-    IdType to = addNode(userDataTo);
-    return addEdge(from,to, weight);          
-}
-*/
 //
 // An auxiliary inster
 //
@@ -616,9 +442,9 @@ GraphLib::Graph<int,MyEdge> backEdgeTest1()
     }    
     
     //add cycle here, here the method depends on the implementation of graph
-    graph.addEdge(GraphLib::IdType(4),GraphLib::IdType(3),1);
-    graph.addEdge(GraphLib::IdType(4),GraphLib::IdType(2),1);
-    graph.addEdge(GraphLib::IdType(4),GraphLib::IdType(1),1);
+    graph.addEdge(graph.getNodeIdByIdx(4),graph.getNodeIdByIdx(3),1);
+    graph.addEdge(graph.getNodeIdByIdx(4),graph.getNodeIdByIdx(2),1);
+    graph.addEdge(graph.getNodeIdByIdx(4),graph.getNodeIdByIdx(1),1);
     
     return graph;
 }
@@ -659,8 +485,8 @@ GraphLib::Graph<int,MyEdge> backEdgeTest2()
     }
     
     //add cycle here, here the method depends on the implementation of graph
-    graph.addEdge(GraphLib::IdType(2),GraphLib::IdType(8),1);
-    graph.addEdge(GraphLib::IdType(9),GraphLib::IdType(4),1);
+    graph.addEdge(graph.getNodeIdByIdx(2),graph.getNodeIdByIdx(8),1);
+    graph.addEdge(graph.getNodeIdByIdx(9),graph.getNodeIdByIdx(4),1);
     
     return graph;
 }
@@ -679,27 +505,27 @@ GraphLib::Graph<int,MyEdge> cyclicLongestGraphTest()
     GraphLib::IdType from(0) ;
     GraphLib::IdType to(1) ;
     graph.addEdge(from,to,1); 
-    to = 2;
+    to = graph.getNodeIdByIdx(2);
     graph.addEdge(from,to,5); 
     
-    from = 2 , to = 3;
+    from = graph.getNodeIdByIdx(2) , to = graph.getNodeIdByIdx(3);
     graph.addEdge(from,to,1);
-    to = 4;
+    to = graph.getNodeIdByIdx(4);
     graph.addEdge(from,to,1);
-    to = 1;
+    to = graph.getNodeIdByIdx(1);
     graph.addEdge(from,to,-3);   
     
-    from = 1, to = 2;
+    from = graph.getNodeIdByIdx(1), to = graph.getNodeIdByIdx(2);
     graph.addEdge(from,to,2); 
-    to = 5;
+    to = graph.getNodeIdByIdx(5);
     graph.addEdge(from,to,2);
     
-    from = 4, to = 3;
+    from = graph.getNodeIdByIdx(4), to = graph.getNodeIdByIdx(3);
     graph.addEdge(from,to,-1);
-    to = 5;
+    to = graph.getNodeIdByIdx(5);
     graph.addEdge(from,to,-4);
     
-    from = 5, to = 4;
+    from = graph.getNodeIdByIdx(5), to = graph.getNodeIdByIdx(4);
     graph.addEdge(from,to,4);    
         
     return graph;
@@ -762,11 +588,11 @@ int main()
     printf("=================cyclic longest path==============\n");
     ans.clear();
     GraphLib::Graph<int,MyEdge> testGraph3 = backEdgeTest1();
-    GraphUtil::longestPath(testGraph3, GraphLib::IdType(0), ans);
+    GraphUtil::longestPath(testGraph3, testGraph3.getNodeIdByIdx(0), ans);
     printf("The sceond test\n");
     ans.clear();
     GraphLib::Graph<int,MyEdge> testGraph4 = cyclicLongestGraphTest();
-    GraphUtil::longestPath(testGraph4, GraphLib::IdType(0), ans);
+    GraphUtil::longestPath(testGraph4, testGraph4.getNodeIdByIdx(0), ans);
     printf("========================================\n");
     
     return EXIT_SUCCESS;

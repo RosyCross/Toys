@@ -32,7 +32,7 @@
 
 #include <map>
 #include <vector>
-//#include <tuple>
+#include <deque>
 
 namespace GraphLib {
 
@@ -69,10 +69,68 @@ class _IdType : public virtual _final
     private:
         int idVal_;
 };
-
-//class my : public _IdType {};
+//const _IdType MAX_IDVAL(INT_MAX);
+//const _IdType MIN_IDVAL(INT_MIN);
+typedef _IdType NodeIdType;
+typedef _IdType EdgeIdType;
 typedef _IdType IdType;
 
+//class my : public _IdType {};
+//typedef _IdType IdType;
+//wrap another IdType for external user. This aims to avoid the invalidation
+//after deletion of nodes and edges
+/*
+class IdType
+{
+    public:
+        //explicit //must
+        IdType(const _IdType& initId):iIdType_(&initId){}
+        explicit //must
+        IdType(const _IdType* initId):iIdType_(initId){}
+
+        explicit
+        IdType(int val):iIdType_(NULL) 
+        { 
+            if (val == INT_MAX) 
+                iIdType_ = &MAX_IDVAL;
+            if (val == INT_MIN)
+                iIdType_ = &MIN_IDVAL; 
+        }
+
+        IdType():iIdType_(NULL){};
+
+        operator int()    const 
+        { checkValid(); return static_cast<int>(*iIdType_);};
+        operator size_t() const 
+        { checkValid(); return static_cast<size_t>(*iIdType_);};
+        bool operator<(const IdType& rhs)  const 
+        { checkValid(); return *iIdType_ < *rhs.iIdType_;};
+        bool operator>(const IdType& rhs)  const 
+        { checkValid(); return *iIdType_ > *rhs.iIdType_;};
+        bool operator==(const IdType& rhs) const 
+        { checkValid(); return *iIdType_ == *rhs.iIdType_;};
+        bool operator>=(const IdType& rhs) const 
+        { checkValid(); return *iIdType_ >= *rhs.iIdType_;};
+        bool operator<=(const IdType& rhs) const 
+        { checkValid(); return *iIdType_ <= *rhs.iIdType_;};
+        
+        bool operator<(int rhs) const 
+        { checkValid(); return *iIdType_  < rhs;};
+        bool operator>(int rhs) const 
+        { checkValid(); return *iIdType_  > rhs;};
+        bool operator==(int rhs) const 
+        { checkValid(); return *iIdType_ == rhs;};     
+        bool operator>=(int rhs) const 
+        { checkValid(); return *iIdType_ >= rhs;};
+        
+        //may not be necessary
+        //const IdType& operator=(int newVal) {iIdType_ = newVal; return *this;};
+        int val() const { checkValid(); return *iIdType_;}
+    private:
+        void checkValid() const { assert(NULL!=iIdType_); }
+        const _IdType* iIdType_;
+};
+*/
 //typedef int IdType;
 template<typename T>
 class GraphNode
@@ -83,7 +141,7 @@ class GraphNode
         
     T userData_;
     int indegree_;
-    IdType id_; 
+    NodeIdType id_; 
 };
 
 template <typename T>
@@ -91,10 +149,12 @@ class GraphEdge
 {
     public:
     GraphEdge(IdType from,IdType to,const T& userDataIn):fromId_(from),toId_(to), userData_(userDataIn) {};
-        
+    IdType getId() const { return edgeId_; }        
+
     IdType fromId_;
     IdType toId_;
          T userData_;
+    EdgeIdType edgeId_;
 };
 
 #if 0
@@ -116,14 +176,14 @@ class Graph
         typedef GraphNode<T> NodeType;
         typedef GraphEdge<S> EdgeType;
 
-        typedef std::vector< std::vector<IdType> > AdjListType;
-        typedef std::vector< IdType >              ListType; 
+        typedef std::vector<IdType> IdListType;
+        typedef std::vector<IdListType> AdjListType;
         
         typedef std::vector< GraphNode<T> >        NodeDepotType;
         typedef std::vector<GraphEdge<S> >         EdgeDepotType;
         
-        typedef std::vector<IdType>::iterator       IdIter; 
-        typedef std::vector<IdType>::const_iterator const_IdIter;
+        typedef IdListType::iterator       IdIter; 
+        typedef IdListType::const_iterator const_IdIter;
         
         typedef std::map<IdType, std::map<IdType, IdType> > NeMapType;
     public:
@@ -198,20 +258,30 @@ class Graph
         IdType addEdge(IdType from, IdType to,const S& edgeData);
         IdType addEdge(const T& userDataFrom, const T& userDataTo, const S& edgeData);
         IdType addEdge(IdType from, const T& userDataTo, const S& edgeData);
-        
+
+        //remove node/edge functions. Would be complicated with vector or deque
+        void   removeNode(const IdType& nodeId);        
+
+
+
         //==============
         //Get Count
         //==============
         size_t nodeCount() { return nodeDepot_.size(); }
         size_t edgeCount() { return edgeDepot_.size(); }
         
-        //size_t getOutEdgeCount(IdType from) { return adjList_[from].size(); }
 
         //=====================
         //Get data from adjacent list, beware that there is NO validity checking
         //=====================
-        const GraphNode<T>& getNodeId(IdType from, IdType to) const 
-        { return adjList_[from][to]; };
+//        const GraphNode<T>& getNodeId(IdType from, IdType to) const 
+//        { return adjList_[from][to]; };
+
+        //Experimental...should not use it unless you are sure what you are doing 
+        IdType getNodeIdByIdx(size_t idx)
+        {
+            return IdType(nodeDepot_[idx].id_);
+        }
         
         const_IdIter  beginNodeIter(IdType from) const
         { return adjList_[from].begin(); }
@@ -288,14 +358,14 @@ class Graph
                  
         private: 
         //use Hash will be good. But STL::MAP is not a real HASH
-        std::vector< std::vector<IdType> > adjList_;
+        AdjListType adjList_;
         std::map<IdType, std::map<IdType, IdType> > neMap_; //cannot think of a concise model for this
         //depots
-        std::vector< GraphNode<T> > nodeDepot_;
-        std::vector<GraphEdge<S> > edgeDepot_;  
+        NodeDepotType nodeDepot_;
+        EdgeDepotType edgeDepot_;  
     
     private:
-        IdType valueToId(size_t value) {return (IdType)value;}          
+        //IdType valueToId(size_t value) {return (IdType)value;}          
 };
 
 
@@ -305,8 +375,8 @@ IdType Graph<T,S>::addNode(const T& userData)
     nodeDepot_.push_back(GraphNode<T>(userData));
     nodeDepot_.back().id_ = nodeDepot_.size()-1;
     //remove this line if adjList becomes hash
-    adjList_.push_back(std::vector<IdType>());//a place holder      
-    return(IdType(nodeDepot_.size()-1));
+    adjList_.push_back(IdListType());//a place holder      
+    return(IdType(nodeDepot_.back().id_));
 }
 
 template<typename T, typename S>
@@ -322,19 +392,20 @@ IdType Graph<T,S>::addEdge(IdType from, IdType to, const S& edgeData)
         return INT_MIN;
         
     if( !(to < (int)nodeDepot_.size() && to >= 0 ) )    
-        return INT_MIN;
+        return INT_MAX;
         
     edgeDepot_.push_back(GraphEdge<S>(from,to,edgeData));
     edgeDepot_.back().fromId_   = from;
     edgeDepot_.back().toId_     = to;
     edgeDepot_.back().userData_ = edgeData;
+    edgeDepot_.back().edgeId_   = edgeDepot_.size()-1;
     ++nodeDepot_[to].indegree_;
     //adjList[from][to] = edgeDepot_.size()-1;
     adjList_[from].push_back(to);
-    neMap_[from][to] = edgeDepot_.size()-1;
+    neMap_[from][to] = edgeDepot_.back().edgeId_;
     //adjList[from].push_back(edgeDepot_.size()-1);
     //printf("F-T:(%d,%d) size:%d\n",(int)from , (int)to, adjList_[from].size());
-    return(IdType(edgeDepot_.size()-1));
+    return(IdType(edgeDepot_.back().edgeId_));
 }
 
 template<typename T, typename S>

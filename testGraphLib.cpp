@@ -209,48 +209,48 @@ void genTestCase(F& flowNetwork)
     tmpEdge.cap = 4;
     flowNetwork.addEdge(from, to, tmpEdge);
     
-    from = 1 , to = 2;
+    from = flowNetwork.getNodeIdByIdx(1) , to = flowNetwork.getNodeIdByIdx(2);
     tmpEdge.cap = 6;
     flowNetwork.addEdge(from, to, tmpEdge);
     
-    from = 2 , to = 3;
+    from = flowNetwork.getNodeIdByIdx(2) , to = flowNetwork.getNodeIdByIdx(3);
     tmpEdge.cap = 5;
     flowNetwork.addEdge(from, to, tmpEdge);
     
-    from = 3 , to = 4;
+    from = flowNetwork.getNodeIdByIdx(3) , to = flowNetwork.getNodeIdByIdx(4);
     tmpEdge.cap = 4;
     flowNetwork.addEdge(from, to, tmpEdge);
 //============================  
-    from = 0 , to = 4;
+    from = flowNetwork.getNodeIdByIdx(0) , to = flowNetwork.getNodeIdByIdx(4);
     tmpEdge.cap = 3;
     flowNetwork.addEdge(from, to, tmpEdge);
     
-    from = 4 , to = 5;
+    from = flowNetwork.getNodeIdByIdx(4) , to = flowNetwork.getNodeIdByIdx(5);
     tmpEdge.cap = 5;
     flowNetwork.addEdge(from, to, tmpEdge);
 //==============================
-    from = 0 , to = 6;
+    from = flowNetwork.getNodeIdByIdx(0) , to = flowNetwork.getNodeIdByIdx(6);
     tmpEdge.cap = 3;
     flowNetwork.addEdge(from, to, tmpEdge); 
     
-    from = 6 , to = 7;
+    from = flowNetwork.getNodeIdByIdx(6) , to = flowNetwork.getNodeIdByIdx(7);
     tmpEdge.cap = 6;
     flowNetwork.addEdge(from, to, tmpEdge); 
     
-    from = 7 , to = 8;
+    from = flowNetwork.getNodeIdByIdx(7) , to = flowNetwork.getNodeIdByIdx(8);
     tmpEdge.cap = 4;
     flowNetwork.addEdge(from, to, tmpEdge); 
     
-    from = 7 , to = 4;
+    from = flowNetwork.getNodeIdByIdx(7) , to = flowNetwork.getNodeIdByIdx(4);
     tmpEdge.cap = 4;
     flowNetwork.addEdge(from, to, tmpEdge); 
     
     
-    from = 8 , to = 9;
+    from = flowNetwork.getNodeIdByIdx(8) , to = flowNetwork.getNodeIdByIdx(9);
     tmpEdge.cap = 8;
     flowNetwork.addEdge(from, to, tmpEdge); 
     
-    from =  9, to = 5;
+    from =  flowNetwork.getNodeIdByIdx(9), to = flowNetwork.getNodeIdByIdx(5);
     tmpEdge.cap = 7;
     flowNetwork.addEdge(from, to, tmpEdge);         
 }
@@ -268,60 +268,60 @@ void genTestCase2(F& flowNetwork)
     flowNetwork.addNode(6);
     flowNetwork.addNode(7);
 
-    GraphLib::IdType from(0);
-    GraphLib::IdType to(1);
+    GraphLib::IdType from = flowNetwork.getNodeIdByIdx(0);
+    GraphLib::IdType to = flowNetwork.getNodeIdByIdx(1);
     tmpEdge.cap = 15;
     flowNetwork.addEdge(from, to, tmpEdge);
     
-    from =  0, to = 2;
+    from = flowNetwork.getNodeIdByIdx(0), to = flowNetwork.getNodeIdByIdx(2);
     tmpEdge.cap = 10;
     flowNetwork.addEdge(from, to, tmpEdge);         
     
-    from =  0, to = 3;
+    from =  flowNetwork.getNodeIdByIdx(0), to = flowNetwork.getNodeIdByIdx(3);
     tmpEdge.cap = 12;
     flowNetwork.addEdge(from, to, tmpEdge); 
 
 //===================================================
-    from =  1, to = 4;
+    from =  flowNetwork.getNodeIdByIdx(1), to = flowNetwork.getNodeIdByIdx(4);
     tmpEdge.cap = 5;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
-    from =  1, to = 5;
+    from =  flowNetwork.getNodeIdByIdx(1), to = flowNetwork.getNodeIdByIdx(5);
     tmpEdge.cap = 5;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
-    from =  1, to = 6;
+    from =  flowNetwork.getNodeIdByIdx(1), to = flowNetwork.getNodeIdByIdx(6);
     tmpEdge.cap = 5;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
 //===============================================   
-    from =  2, to = 4;
+    from =  flowNetwork.getNodeIdByIdx(2), to = flowNetwork.getNodeIdByIdx(4);
     tmpEdge.cap = 6;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
-    from =  2, to = 5;
+    from =  flowNetwork.getNodeIdByIdx(2), to = flowNetwork.getNodeIdByIdx(5);
     tmpEdge.cap = 6;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
-    from =  2, to = 6;
+    from =  flowNetwork.getNodeIdByIdx(2), to = flowNetwork.getNodeIdByIdx(6);
     tmpEdge.cap = 6;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
 //================================================
-    from =  3, to = 4;
+    from =  flowNetwork.getNodeIdByIdx(3), to = flowNetwork.getNodeIdByIdx(4);
     tmpEdge.cap = 12;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
 //================================================
-    from =  4, to = 7;
+    from =  flowNetwork.getNodeIdByIdx(4), to = flowNetwork.getNodeIdByIdx(7);
     tmpEdge.cap = 10;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
-    from =  5, to = 7;
+    from =  flowNetwork.getNodeIdByIdx(5), to = flowNetwork.getNodeIdByIdx(7);
     tmpEdge.cap = 15;
     flowNetwork.addEdge(from, to, tmpEdge);                 
     
-    from =  6, to = 7;
+    from =  flowNetwork.getNodeIdByIdx(6), to = flowNetwork.getNodeIdByIdx(7);
     tmpEdge.cap = 15;
     flowNetwork.addEdge(from, to, tmpEdge);                     
     
@@ -339,11 +339,11 @@ int main(int argc, char* argv[])
     //GraphLib::GraphEdge<eTuple> edgeTest1(0,1,a)
     GraphLib::Graph<int, eTuple > graph;
     genTestCase< GraphLib::Graph<int,eTuple >, eTuple >(graph);
-    GraphUtil::Edmond_Karp_MaxFlow(graph, GraphLib::IdType(0), GraphLib::IdType(5) );
+    GraphUtil::Edmond_Karp_MaxFlow(graph, graph.getNodeIdByIdx(0), graph.getNodeIdByIdx(5) );
     
     GraphLib::Graph<int, eTuple > graph2;
     genTestCase2< GraphLib::Graph<int,eTuple >, eTuple >(graph2);
-    GraphUtil::Edmond_Karp_MaxFlow(graph2, GraphLib::IdType(0), GraphLib::IdType(7) );
+    GraphUtil::Edmond_Karp_MaxFlow(graph2, graph2.getNodeIdByIdx(0), graph2.getNodeIdByIdx(7) );
 
     return EXIT_SUCCESS;
 }

@@ -218,7 +218,7 @@ void getBackEdgeList(G& graph, B& backEdgeListInserter)
         
         //Start to DFS starting from this node.
         predecessorHT.clear();
-        curRec.nodeVId = cnter; 
+        curRec.nodeVId = graph.getNodeIdByIdx(cnter); 
         curRec.iter    = (*iter).begin();               
         do
         {   
@@ -299,7 +299,8 @@ void dagLogestPath(G& network, GraphLib::IdType source, std::vector<int>& dist, 
     //initialize indegree;
     for(int idx = 0; idx < inDegree.size(); ++idx)
     {
-        inDegree[idx] = network.getNodeData(idx).indegree_;
+        inDegree[idx] = 
+        network.getNodeData(network.getNodeIdByIdx(idx)).indegree_;
     }
     // Minus the inDegrees in the skip edges
     for(std::set<GraphLib::IdType>::iterator iter = skipEdge.begin();
@@ -327,7 +328,7 @@ void dagLogestPath(G& network, GraphLib::IdType source, std::vector<int>& dist, 
         queue.pop();
         
         //printf("now checking:%d\n", curNodeId.val());
-        for(typename G::ListType::const_iterator cIter = network.beginNodeIter(curNodeId);
+        for(typename G::const_IdIter cIter = network.beginNodeIter(curNodeId);
             cIter != network.endNodeIter(curNodeId);
             ++cIter
            )
