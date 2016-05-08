@@ -206,7 +206,8 @@ class Graph
         IdType addEdge(IdType from, const T& userDataTo, const S& edgeData);
 
         //remove node/edge functions. Would be complicated with vector or deque
-        void   removeNode(const IdType& nodeId);        
+        void removeNode(const IdType& nodeId);        
+        void removeEdge(const IdType& edgeId);
 
 
 
@@ -273,19 +274,73 @@ class Graph
         bool isValidEdgeId(IdType edgeId) const
         { return edgeId >= 0 && edgeId < edgeDepot_.size(); }
         
+        //=======================
         //Get things from Depot
-        GraphNode<T>& getNodeData(IdType nodeId)
-        { return nodeDepot_[nodeId]; };
+        //=======================
+        //
+        // Fundamental getter with sanity checking
+        const NodeType* getNode(IdType nodeId) const
+        {
+            IdType id = nodeIdMapper_.getId(nodeId);
+            if (id >= nodeDepot_.size()) return NULL;
+
+            return &nodeDepot_[id];
+        }
+
+        const EdgeType* getEdge(IdType edgeId) const
+        {
+            IdType id = edgeIdMapper_.getId(edgeId);
+            if (id >= edgeDepot_.size()) return NULL;
+
+            return &edgeDepot_[id];
+        }
         
-        GraphEdge<S>& getEdgeData(IdType edgeId)
-        { return edgeDepot_[edgeId]; };
+        NodeType* getNode(IdType nodeId) 
+        {
+            return
+            const_cast<NodeType*>(
+                const_cast<const Graph*>(this)->
+                    getNode(nodeId));
+        }
+
+        EdgeType* getEdge(IdType edgeId)
+        {
+            return
+            const_cast<EdgeType*>(
+                const_cast<const Graph*>(this)->
+                    getEdge(edgeId));
+        }
+
+        const NodeType& getNodeData(IdType nodeId) const
+        { 
+            const NodeType* node = getNode(nodeId);
+            assert(node);
+            return *node; 
+        };
         
-        const GraphNode<T>& getNodeData(IdType nodeId) const
-        { return nodeDepot_[nodeId]; };
+        const EdgeType& getEdgeData(IdType edgeId) const
+        { 
+            const EdgeType* edge = getEdge(edgeId);
+            assert(edge);
+            return *edge; 
+        };
+
+        NodeType& getNodeData(IdType nodeId)
+        { 
+            return
+            const_cast<NodeType&>(
+                const_cast<const Graph*>(this)->
+                    getNodeData(nodeId));
+        };
         
-        const GraphEdge<S>& getEdgeData(IdType edgeId) const
-        { return edgeDepot_[edgeId]; };
-                 
+        EdgeType& getEdgeData(IdType edgeId)
+        {
+            return
+            const_cast<EdgeType&>(
+                 const_cast<const Graph*>(this)->
+                      getEdgeData(edgeId) );
+        }
+        
         bool hasEdge(IdType from, IdType to)
         {
             if( neMap_.end() != neMap_.find(from) )
@@ -299,7 +354,6 @@ class Graph
             return false;
         }
       
-        void removeEdge(const IdType& id);
                  
         private: 
         //use Hash will be good. But STL::MAP is not a real HASH
@@ -454,7 +508,7 @@ class
 Graph<T,S>::IdMapper
 {
     public:
-        IdType getId(const IdType& id);
+        IdType getId(const IdType& id) const;
         template<typename Ctnr>
         IdType genId(const Ctnr& depot);
         void   addId(const IdType& idFrom, const IdType& idTo);
@@ -469,7 +523,7 @@ Graph<T,S>::IdMapper
 
 template<typename T, typename S>
 IdType
-Graph<T,S>::IdMapper::getId(const IdType& id)
+Graph<T,S>::IdMapper::getId(const IdType& id) const
 {
     IdMap::const_iterator it =
     idMap_.find(id);
