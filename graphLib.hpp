@@ -32,6 +32,7 @@
 
 #include <map>
 #include <vector>
+#include <queue>
 #include <deque>
 
 namespace GraphLib {
@@ -61,6 +62,11 @@ class _IdType : public virtual _final
         bool operator>(int rhs) const {return idVal_  > rhs;};
         bool operator==(int rhs) const {return idVal_ == rhs;};     
         bool operator>=(int rhs) const {return idVal_ >= rhs;};
+
+        bool operator<(size_t rhs) const {return idVal_  < rhs;};
+        bool operator>(size_t rhs) const {return idVal_  > rhs;};
+        bool operator==(size_t rhs) const {return idVal_ == rhs;};     
+        bool operator>=(size_t rhs) const {return idVal_ >= rhs;};
         
         //may not be necessary
         const _IdType& operator=(int newVal )  { idVal_ = newVal; return *this;};
@@ -75,62 +81,6 @@ typedef _IdType NodeIdType;
 typedef _IdType EdgeIdType;
 typedef _IdType IdType;
 
-//class my : public _IdType {};
-//typedef _IdType IdType;
-//wrap another IdType for external user. This aims to avoid the invalidation
-//after deletion of nodes and edges
-/*
-class IdType
-{
-    public:
-        //explicit //must
-        IdType(const _IdType& initId):iIdType_(&initId){}
-        explicit //must
-        IdType(const _IdType* initId):iIdType_(initId){}
-
-        explicit
-        IdType(int val):iIdType_(NULL) 
-        { 
-            if (val == INT_MAX) 
-                iIdType_ = &MAX_IDVAL;
-            if (val == INT_MIN)
-                iIdType_ = &MIN_IDVAL; 
-        }
-
-        IdType():iIdType_(NULL){};
-
-        operator int()    const 
-        { checkValid(); return static_cast<int>(*iIdType_);};
-        operator size_t() const 
-        { checkValid(); return static_cast<size_t>(*iIdType_);};
-        bool operator<(const IdType& rhs)  const 
-        { checkValid(); return *iIdType_ < *rhs.iIdType_;};
-        bool operator>(const IdType& rhs)  const 
-        { checkValid(); return *iIdType_ > *rhs.iIdType_;};
-        bool operator==(const IdType& rhs) const 
-        { checkValid(); return *iIdType_ == *rhs.iIdType_;};
-        bool operator>=(const IdType& rhs) const 
-        { checkValid(); return *iIdType_ >= *rhs.iIdType_;};
-        bool operator<=(const IdType& rhs) const 
-        { checkValid(); return *iIdType_ <= *rhs.iIdType_;};
-        
-        bool operator<(int rhs) const 
-        { checkValid(); return *iIdType_  < rhs;};
-        bool operator>(int rhs) const 
-        { checkValid(); return *iIdType_  > rhs;};
-        bool operator==(int rhs) const 
-        { checkValid(); return *iIdType_ == rhs;};     
-        bool operator>=(int rhs) const 
-        { checkValid(); return *iIdType_ >= rhs;};
-        
-        //may not be necessary
-        //const IdType& operator=(int newVal) {iIdType_ = newVal; return *this;};
-        int val() const { checkValid(); return *iIdType_;}
-    private:
-        void checkValid() const { assert(NULL!=iIdType_); }
-        const _IdType* iIdType_;
-};
-*/
 //typedef int IdType;
 template<typename T>
 class GraphNode
@@ -249,12 +199,8 @@ class Graph
                 mutable typename NodeDepotType::iterator iter_;
         };    
     public:
-        IdType addNode(const T& userData);
-        //IdType addEdge(IdType from, IdType to,int weight);
-        //IdType addEdge(const T& userDataFrom, const T& userDataTo, int weight);
-        //IdType addEdge(IdType from, const T& userDataTo, int weight);
-        
         //templated addEdge functions
+        IdType addNode(const T& userData);
         IdType addEdge(IdType from, IdType to,const S& edgeData);
         IdType addEdge(const T& userDataFrom, const T& userDataTo, const S& edgeData);
         IdType addEdge(IdType from, const T& userDataTo, const S& edgeData);
@@ -274,9 +220,6 @@ class Graph
         //=====================
         //Get data from adjacent list, beware that there is NO validity checking
         //=====================
-//        const GraphNode<T>& getNodeId(IdType from, IdType to) const 
-//        { return adjList_[from][to]; };
-
         //Experimental...should not use it unless you are sure what you are doing 
         IdType getNodeIdByIdx(size_t idx)
         {
@@ -355,30 +298,86 @@ class Graph
             
             return false;
         }
+      
+        void removeEdge(const IdType& id);
                  
         private: 
         //use Hash will be good. But STL::MAP is not a real HASH
         AdjListType adjList_;
-        std::map<IdType, std::map<IdType, IdType> > neMap_; //cannot think of a concise model for this
+        //cannot think of a concise model for this
+        std::map<IdType, std::map<IdType, IdType> > neMap_; 
         //depots
         NodeDepotType nodeDepot_;
         EdgeDepotType edgeDepot_;  
     
     private:
         //IdType valueToId(size_t value) {return (IdType)value;}          
+        class IdMapper;
+        template<typename Cntr>
+        void removeDepotId(const IdType& id, IdMapper& idMapper,Cntr& depot);
+        IdMapper nodeIdMapper_;
+        IdMapper edgeIdMapper_;
 };
-
 
 template<typename T, typename S>
 IdType Graph<T,S>::addNode(const T& userData)
 {
-    nodeDepot_.push_back(GraphNode<T>(userData));
-    nodeDepot_.back().id_ = nodeDepot_.size()-1;
+    IdType id = nodeIdMapper_.genId(nodeDepot_);
+    if (id == nodeDepot_.size())
+        nodeDepot_.push_back(GraphNode<T>(userData));
+    else
+        nodeDepot_[id].userData_ = userData;
+    nodeDepot_[id].id_ = id;
     //remove this line if adjList becomes hash
-    adjList_.push_back(IdListType());//a place holder      
-    return(IdType(nodeDepot_.back().id_));
+    if (id == adjList_.size())
+       adjList_.push_back(IdListType());//a place holder      
+    else
+       adjList_[id].clear();
+
+    nodeIdMapper_.addId(id,id);
+    return id;
+}
+template<typename T, typename S>
+void Graph<T,S>::removeNode(const IdType& nodeId)
+{
+    removeDepotId(nodeId, nodeIdMapper_, nodeDepot_);
 }
 
+template<typename T, typename S>
+template<typename Cntr>
+void Graph<T,S>::removeDepotId(const IdType& nodeId,IdMapper& idMapper,  Cntr& depot)
+{
+    typename IdMapper::iterator it = idMapper.find(nodeId);
+    if ( idMapper.end() == it)
+        return;
+
+    if ( nodeId == depot.size()-1 )
+    {
+        depot.erase(depot.end()-1);
+        idMapper.removeId(nodeId); 
+    }
+    else
+    {
+        IdType lastNodeId = depot.size() - 1;    
+        typename IdMapper::iterator lastNodeIdMapIt = 
+                                         idMapper.find(nodeId);
+        //swap nodeId content to the last position
+        std::swap(depot[nodeId], depot[lastNodeId]);
+        //now the nodeId is the node of the orginal lastNodeId.
+        //adjust all the info in the node. 
+        depot[nodeId].id_ = nodeId;//might not be necessary
+        (*lastNodeIdMapIt).second = nodeId;
+        //remove the all related info with the intended to be removed node
+        depot.erase(depot.end()-1);
+        idMapper.removeId(nodeId);
+        idMapper.addReuseId(nodeId);
+    }
+
+}
+
+//================================
+// edge operation
+//================================
 template<typename T, typename S>
 IdType Graph<T,S>::addEdge(IdType from, IdType to, const S& edgeData)
 {   
@@ -394,18 +393,23 @@ IdType Graph<T,S>::addEdge(IdType from, IdType to, const S& edgeData)
     if( !(to < (int)nodeDepot_.size() && to >= 0 ) )    
         return INT_MAX;
         
-    edgeDepot_.push_back(GraphEdge<S>(from,to,edgeData));
-    edgeDepot_.back().fromId_   = from;
-    edgeDepot_.back().toId_     = to;
-    edgeDepot_.back().userData_ = edgeData;
-    edgeDepot_.back().edgeId_   = edgeDepot_.size()-1;
-    ++nodeDepot_[to].indegree_;
-    //adjList[from][to] = edgeDepot_.size()-1;
+    IdType id = edgeIdMapper_.genId(edgeDepot_);
+    if (id == edgeDepot_.size())
+        edgeDepot_.push_back(GraphEdge<S>(from,to,edgeData));
+    else
+        edgeDepot_[id].userData_ = edgeData;
+
+    edgeDepot_[id].fromId_   = from;
+    edgeDepot_[id].toId_     = to;
+    //edgeDepot_[id].back().userData_ = edgeData;
+    edgeDepot_[id].edgeId_   = id;
     adjList_[from].push_back(to);
-    neMap_[from][to] = edgeDepot_.back().edgeId_;
-    //adjList[from].push_back(edgeDepot_.size()-1);
-    //printf("F-T:(%d,%d) size:%d\n",(int)from , (int)to, adjList_[from].size());
-    return(IdType(edgeDepot_.back().edgeId_));
+    neMap_[from][to] = id;
+
+    ++nodeDepot_[to].indegree_;
+
+    edgeIdMapper_.addId(id,id);
+    return id;
 }
 
 template<typename T, typename S>
@@ -428,6 +432,86 @@ IdType Graph<T,S>::addEdge(IdType from, const T& userDataTo, const S& edgeData)
 
     IdType to = addNode(userDataTo);
     return addEdge(from,to, edgeData);        
+}
+
+template<typename T, typename S>
+void Graph<T,S>::removeEdge(const IdType& edgeId)
+{
+    typename EdgeDepotType::iterator it = edgeDepot_.find(edgeId);
+    if (it==edgeDepot_.end()) return;
+
+    GraphEdge<S>& edge = edgeDepot_[(*it).second];
+    removeNode(edge.fromId_);
+    removeNode(edge.toId_);
+    removeDepotId(edgeId, edgeDepot_);
+}
+
+//============================
+// Id Mapper
+//============================
+template<typename T, typename S>
+class
+Graph<T,S>::IdMapper
+{
+    public:
+        IdType getId(const IdType& id);
+        template<typename Ctnr>
+        IdType genId(const Ctnr& depot);
+        void   addId(const IdType& idFrom, const IdType& idTo);
+        void removeId(const IdType& id);
+        void   addReuseId(const IdType& id);
+
+    private:
+        typedef std::map<IdType,IdType> IdMap;
+        IdMap idMap_;
+        std::priority_queue<IdType> reuseIds_;
+};
+
+template<typename T, typename S>
+IdType
+Graph<T,S>::IdMapper::getId(const IdType& id)
+{
+    IdMap::const_iterator it =
+    idMap_.find(id);
+    return it != idMap_.end() ? (*it).second : IdType(INT_MAX);    
+}
+
+template<typename T, typename S>
+template<typename Ctnr>
+IdType
+Graph<T,S>::IdMapper::genId(const Ctnr& depot)
+{
+    if (reuseIds_.empty())
+    {
+        return depot.size();
+    }
+    else
+    {
+        IdType id = reuseIds_.top();
+        reuseIds_.pop();
+        return id; 
+    }
+}
+
+template<typename T, typename S>
+void
+Graph<T,S>::IdMapper::addId(const IdType& idFrom, const IdType& idTo)
+{
+    idMap_[idFrom] = idTo;
+}
+
+template<typename T, typename S>
+void
+Graph<T,S>::IdMapper::removeId(const IdType& id)
+{
+    idMap_.erase(id);
+}
+
+template<typename T, typename S>
+void
+Graph<T,S>::IdMapper::addReuseId(const IdType& id)
+{
+    reuseIds_.push(id);
 }
 
 } //namespace

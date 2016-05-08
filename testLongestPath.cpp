@@ -468,21 +468,14 @@ GraphLib::Graph<int,MyEdge> backEdgeTest2()
         graph.addEdge(from,to,1);
         from = to;
     }    
-    
-    for(int idx = 3; idx < 6; ++idx)
-    {
-        from = graph.addNode(idx);
-        graph.addEdge(from, to,1);
-        to = from;
-    }   
-    
-    from = graph.addNode(6);
-    for(int idx = 7; idx < 12; ++idx)
+
+    from = graph.addNode(3);
+    for(int idx = 4; idx < 12; ++idx)
     {
         to = graph.addNode(idx);
-        graph.addEdge(from,to,1);
+        graph.addEdge(from, to,1);
         from = to;
-    }
+    }   
     
     //add cycle here, here the method depends on the implementation of graph
     graph.addEdge(graph.getNodeIdByIdx(2),graph.getNodeIdByIdx(8),1);
@@ -567,14 +560,29 @@ int main()
     
     shortestPath(graph, srcNodeId);
 */  
+    typedef std::vector<GraphLib::IdType> IdList;
     printf("=================back edge==============\n");
-    std::vector<GraphLib::IdType> backEdgeList;
-    Inserter<std::vector<GraphLib::IdType> > inserter(backEdgeList);
+    IdList backEdgeList;
+    Inserter<IdList > inserter(backEdgeList);
     GraphLib::Graph<int,MyEdge> testGraph = backEdgeTest1();
     GraphUtil::getBackEdgeList(testGraph, inserter);
+    printf("==== test1 result=====\n");
+    for (IdList::iterator it= backEdgeList.begin(); it!=backEdgeList.end();++it)
+    {
+        GraphLib::GraphEdge<MyEdge>& edgeData = testGraph.getEdgeData(*it); 
+        printf("%d %d \n", (int)edgeData.fromId_, (int)edgeData.toId_);
+    }
     backEdgeList.clear();
     testGraph = backEdgeTest2();
     GraphUtil::getBackEdgeList(testGraph, inserter);
+    printf("==== test2 result=====\n");
+    for (IdList::iterator it= backEdgeList.begin(); it!=backEdgeList.end();++it)
+    {
+        GraphLib::GraphEdge<MyEdge>& edgeData = testGraph.getEdgeData(*it); 
+        printf("%d %d \n", (int)edgeData.fromId_, (int)edgeData.toId_);
+    }
+    backEdgeList.clear();
+
     printf("========================================\n");
     
     printf("=================dag longest path==============\n");
