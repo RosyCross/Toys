@@ -269,10 +269,14 @@ class Graph
         //simple Id validity checking
         //=====================
         bool isValidNodeId(IdType nodeId) const
-        { return 0 <= nodeId.val() && nodeId.val() < nodeDepot_.size(); }
+        { 
+            return nodeIdMapper_.count(nodeId)>0; 
+        }
         
         bool isValidEdgeId(IdType edgeId) const
-        { return edgeId >= 0 && edgeId < edgeDepot_.size(); }
+        { 
+            return edgeIdMapper_.cout(edgeId)>0; 
+        }
         
         //=======================
         //Get things from Depot
