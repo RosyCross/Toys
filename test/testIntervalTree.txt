@@ -1,0 +1,146 @@
+Node Info: count:1 coord1:0 coord2:500 status:3
+Node Info: count:0 coord1:0 coord2:1000 status:2
+SINGLE
+Delete
+Node Info: count:1 coord1:0 coord2:500 status:3
+Node Info: count:0 coord1:0 coord2:1000 status:2
+SINGLE
+===>0x28803020 
+====================Test Reverse Overlap====================
+Node Info: count:1 coord1:0 coord2:1000 status:3
+SINGLE
+======= reverse overlap ========
+====================End of Test Reverse Overlap====================
+x:0 --- (0, 10)=(30,15)
+x:1 --- (1, 1)=(5,30)
+x:5 --- (1, 1)=(5,30)
+x:30 --- (0, 10)=(30,15)
+(0,15) (0,10)
+(1,10) (1,1)
+(1,30) (1,15)
+(5,1) (5,10)
+(5,15) (5,30)
+(30,10) (30,15)
+segmentLink:[0] (0,15)-(0,10) head:9 tail:7
+segmentLink:[1] (1,10)-(1,1) head:7 tail:6
+segmentLink:[2] (1,30)-(1,15) head:11 tail:9
+segmentLink:[3] (5,1)-(5,10) head:6 tail:8
+segmentLink:[4] (5,15)-(5,30) head:10 tail:11
+segmentLink:[5] (30,10)-(30,15) head:8 tail:10
+segmentLink:[6] (1,1)-(5,1) head:1 tail:3
+segmentLink:[7] (0,10)-(1,10) head:0 tail:1
+segmentLink:[8] (5,10)-(30,10) head:3 tail:5
+segmentLink:[9] (1,15)-(0,15) head:2 tail:0
+segmentLink:[10] (30,15)-(5,15) head:5 tail:4
+segmentLink:[11] (5,30)-(1,30) head:4 tail:2
+CONTOUR: (0,15)-(0,10)
+CONTOUR: (0,10)-(1,10)
+CONTOUR: (1,10)-(1,1)
+CONTOUR: (1,1)-(5,1)
+CONTOUR: (5,1)-(5,10)
+CONTOUR: (5,10)-(30,10)
+CONTOUR: (30,10)-(30,15)
+CONTOUR: (30,15)-(5,15)
+CONTOUR: (5,15)-(5,30)
+CONTOUR: (5,30)-(1,30)
+CONTOUR: (1,30)-(1,15)
+CONTOUR: (1,15)-(0,15)
+====================End of testing merging rectangles ===============
+==============Start of Testing harder shapes===============
+x:1 --- (1, 1)=(10,10)
+x:1 --- (1, 51)=(10,60)
+x:2 --- (2, 2)=(4,56)
+x:3 --- (3, 3)=(35,5)
+x:3 --- (3, 53)=(35,55)
+x:4 --- (2, 2)=(4,56)
+x:10 --- (1, 1)=(10,10)
+x:10 --- (1, 51)=(10,60)
+x:31 --- (31, 1)=(40,10)
+x:31 --- (31, 51)=(40,60)
+x:32 --- (32, 2)=(34,56)
+x:34 --- (32, 2)=(34,56)
+x:35 --- (3, 3)=(35,5)
+x:35 --- (3, 53)=(35,55)
+x:40 --- (31, 1)=(40,10)
+x:40 --- (31, 51)=(40,60)
+(1,10) (1,1)
+(1,60) (1,51)
+(2,51) (2,10)
+(4,10) (4,51)
+(10,1) (10,3)
+(10,5) (10,10)
+(10,51) (10,53)
+(10,55) (10,60)
+(31,3) (31,1)
+(31,10) (31,5)
+(31,53) (31,51)
+(31,60) (31,55)
+(32,51) (32,10)
+(34,10) (34,51)
+(40,1) (40,10)
+(40,51) (40,60)
+segmentLink:[0] (1,10)-(1,1) head:20 tail:16
+segmentLink:[1] (1,60)-(1,51) head:30 tail:24
+segmentLink:[2] (2,51)-(2,10) head:24 tail:20
+segmentLink:[3] (4,10)-(4,51) head:21 tail:25
+segmentLink:[4] (10,1)-(10,3) head:16 tail:18
+segmentLink:[5] (10,5)-(10,10) head:19 tail:21
+segmentLink:[6] (10,51)-(10,53) head:25 tail:28
+segmentLink:[7] (10,55)-(10,60) head:29 tail:30
+segmentLink:[8] (31,3)-(31,1) head:18 tail:17
+segmentLink:[9] (31,10)-(31,5) head:22 tail:19
+segmentLink:[10] (31,53)-(31,51) head:28 tail:26
+segmentLink:[11] (31,60)-(31,55) head:31 tail:29
+segmentLink:[12] (32,51)-(32,10) head:26 tail:22
+segmentLink:[13] (34,10)-(34,51) head:23 tail:27
+segmentLink:[14] (40,1)-(40,10) head:17 tail:23
+segmentLink:[15] (40,51)-(40,60) head:27 tail:31
+segmentLink:[16] (1,1)-(10,1) head:0 tail:4
+segmentLink:[17] (31,1)-(40,1) head:8 tail:14
+segmentLink:[18] (10,3)-(31,3) head:4 tail:8
+segmentLink:[19] (31,5)-(10,5) head:9 tail:5
+segmentLink:[20] (2,10)-(1,10) head:2 tail:0
+segmentLink:[21] (10,10)-(4,10) head:5 tail:3
+segmentLink:[22] (32,10)-(31,10) head:12 tail:9
+segmentLink:[23] (40,10)-(34,10) head:14 tail:13
+segmentLink:[24] (1,51)-(2,51) head:1 tail:2
+segmentLink:[25] (4,51)-(10,51) head:3 tail:6
+segmentLink:[26] (31,51)-(32,51) head:10 tail:12
+segmentLink:[27] (34,51)-(40,51) head:13 tail:15
+segmentLink:[28] (10,53)-(31,53) head:6 tail:10
+segmentLink:[29] (31,55)-(10,55) head:11 tail:7
+segmentLink:[30] (10,60)-(1,60) head:7 tail:1
+segmentLink:[31] (40,60)-(31,60) head:15 tail:11
+CONTOUR: (1,10)-(1,1)
+CONTOUR: (1,1)-(10,1)
+CONTOUR: (10,1)-(10,3)
+CONTOUR: (10,3)-(31,3)
+CONTOUR: (31,3)-(31,1)
+CONTOUR: (31,1)-(40,1)
+CONTOUR: (40,1)-(40,10)
+CONTOUR: (40,10)-(34,10)
+CONTOUR: (34,10)-(34,51)
+CONTOUR: (34,51)-(40,51)
+CONTOUR: (40,51)-(40,60)
+CONTOUR: (40,60)-(31,60)
+CONTOUR: (31,60)-(31,55)
+CONTOUR: (31,55)-(10,55)
+CONTOUR: (10,55)-(10,60)
+CONTOUR: (10,60)-(1,60)
+CONTOUR: (1,60)-(1,51)
+CONTOUR: (1,51)-(2,51)
+CONTOUR: (2,51)-(2,10)
+CONTOUR: (2,10)-(1,10)
+CONTOUR: (4,10)-(4,51)
+CONTOUR: (4,51)-(10,51)
+CONTOUR: (10,51)-(10,53)
+CONTOUR: (10,53)-(31,53)
+CONTOUR: (31,53)-(31,51)
+CONTOUR: (31,51)-(32,51)
+CONTOUR: (32,51)-(32,10)
+CONTOUR: (32,10)-(31,10)
+CONTOUR: (31,10)-(31,5)
+CONTOUR: (31,5)-(10,5)
+CONTOUR: (10,5)-(10,10)
+CONTOUR: (10,10)-(4,10)
+==============END of Testing harder shapes===============
